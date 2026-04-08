@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Маршрут</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+  <style>
+    #map { height: 600px; width: 100%; }
+    #info { padding: 10px; font-size: 15px; }
+  </style>
+</head>
+<body>
+
+  <div id="info">Будуємо маршрут по вулицях...</div>
+  <div id="map"></div>
+
+  {{ coords|json_script:"coords-data" }}
+
+  <script>
+    const coords = JSON.parse(document.getElementById('coords-data').textContent);
+
+    const map = L.map('map').setView([coords[0].lat, coords[0].lon], 14);
+
+    // Тайли OpenStreetMap — карта з вулицями
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    // Кольорові маркери по категоріях
+    const COLORS = { cafe: '#E8793A', restaurant: '#E84A4A', museum: '#4A90E2' };
+
+    coords.forEach((place, i) => {
+      const color = COLORS[place.category] || '#888';
+      const icon = L.divIcon({
+        html: `<div style="
+          background:${color}; color:#fff; border-radius:50%;
+          width:30px; height:30px; display:flex;
+          align-items:center; justify-content:center;
+          font-weight:bold; font-size:14px;
+          border:2px solid #fff; box-shadow:0 2px 5px rgba(0,0,0,.3);
+        ">${i + 1}</div>`,
+        iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -18]
+      });
+      L.marker([place.lat, place.lon], { icon })
+        .bindPopup(`<b>${i + 1}. ${place.name}</b>`)
+        .addTo(map);
+    });
+
+    // Маршрут по вулицях через OSRM
+    if (coords.length > 1) {
+      const control = L.Routing.control({
+        waypoints: coords.map(p => L.latLng(p.lat, p.lon)),
+        router: L.Routing.osrmv1({
+          serviceUrl: 'https://router.project-osrm.org/route/v1',
+          profile: 'foot',   // пішки. 'driving' або 'cycling' теж працює
+        }),
+        lineOptions: {
+          styles: [{ color: '#4A90E2', weight: 5, opacity: 0.85 }]
+        },
+        createMarker: () => null,  // прибираємо дублікати маркерів
+        show: false,               // ховаємо панель покрокових інструкцій
+      }).addTo(map);
+
+      // Виводимо відстань і час після побудови
+      control.on('routesfound', (e) => {
+        const r   = e.routes[0];
+        const km  = (r.summary.totalDistance / 1000).toFixed(2);
+        const min = Math.round(r.summary.totalTime / 60);
+        document.getElementById('info').innerHTML =
+          `Маршрут по вулицях: <b>${km} км</b> | Час пішки: <b>~${min} хв</b>`;
+      });
+    }
+  </script>
+
+</body>
+</html>

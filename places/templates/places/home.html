@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% block title %}МандрівникUA{% endblock %}
+
+{% block extra_styles %}
+.page {
+  min-height: calc(100vh - 74px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+}
+
+.box {
+  width: 100%;
+  max-width: 420px;
+}
+
+/* Robot */
+.robot-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.robot-row svg { width: 64px; height: 74px; flex-shrink: 0; }
+.bubble {
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: 16px 16px 16px 0;
+  padding: 14px 18px;
+  font-size: 14px;
+  line-height: 1.6;
+  flex: 1;
+}
+.bubble b  { color: var(--yellow); }
+.bubble em { color: var(--mint); font-style: normal; }
+
+/* Tabs */
+.tabs {
+  display: flex;
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.tab {
+  flex: 1;
+  padding: 12px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--ink);
+  opacity: .4;
+  transition: background .15s, opacity .15s;
+}
+.tab.active { background: var(--ink); color: var(--paper); opacity: 1; }
+.tab:first-child { border-right: 2px solid var(--ink); }
+
+/* Forms */
+.form { display: none; flex-direction: column; gap: 14px; }
+.form.show { display: flex; }
+
+.lbl { font-size: 12px; opacity: .5; text-transform: uppercase; letter-spacing: .06em; display: block; margin-bottom: 5px; }
+
+.error {
+  background: #fff0f0;
+  border: 1.5px solid #fca5a5;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #b91c1c;
+  line-height: 1.5;
+  margin-bottom: 4px;
+}
+
+.submit { width: 100%; justify-content: center; padding: 14px; font-size: 15px; }
+{% endblock %}
+
+{% block content %}
+<div class="page">
+  <div class="box">
+
+    <!-- Робот -->
+    <div class="robot-row">
+      <svg class="robot-float" viewBox="0 0 80 96" fill="none">
+        <line x1="40" y1="6" x2="40" y2="14" stroke="#0f0e17" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="40" cy="4" r="4" fill="#ff6b35"/>
+        <rect x="10" y="14" width="60" height="46" rx="12" fill="#0f0e17"/>
+        <rect x="17" y="20" width="46" height="34" rx="8" fill="#1a1a2e"/>
+        <g class="robot-eye"><rect x="22" y="28" width="14" height="14" rx="4" fill="#00c9a7"/></g>
+        <g class="robot-eye" style="animation-delay:.2s"><rect x="44" y="28" width="14" height="14" rx="4" fill="#00c9a7"/></g>
+        <path d="M26 46 Q40 54 54 46" stroke="#ffd166" stroke-width="2" stroke-linecap="round" fill="none"/>
+        <rect x="32" y="60" width="16" height="8" rx="3" fill="#0f0e17"/>
+        <rect x="8" y="68" width="64" height="28" rx="10" fill="#0f0e17"/>
+        <rect x="1" y="70" width="12" height="22" rx="6" fill="#0f0e17"/>
+        <rect x="67" y="70" width="12" height="22" rx="6" fill="#0f0e17"/>
+      </svg>
+      <div class="bubble" id="robot-msg">
+        Привіт! 👋 Я <b>МандрівnikBot</b>.<br>
+        Увійди або зареєструйся — і підберемо <em>ідеальний маршрут</em>!
+      </div>
+    </div>
+
+    <!-- Таби -->
+    <div class="tabs">
+      <button class="tab active" id="tab-login" onclick="sw('login')">Увійти</button>
+      <button class="tab"        id="tab-reg"   onclick="sw('reg')">Реєстрація</button>
+    </div>
+
+    <!-- Помилки -->
+    {% if login_error %}
+      <div class="error">Неправильний логін або пароль.</div>
+    {% endif %}
+    {% if reg_form.errors %}
+      <div class="error">
+        {% for f in reg_form %}{% for e in f.errors %}{{ e }}<br>{% endfor %}{% endfor %}
+        {% for e in reg_form.non_field_errors %}{{ e }}<br>{% endfor %}
+      </div>
+    {% endif %}
+
+    <!-- Форма входу -->
+    <form method="POST" class="form {% if not reg_form.errors %}show{% endif %}" id="form-login">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="login">
+      <div>
+        <label class="lbl">Логін</label>
+        <input type="text" name="username" placeholder="mykola_mandrivnyk" autofocus>
+      </div>
+      <div>
+        <label class="lbl">Пароль</label>
+        <input type="password" name="password" placeholder="••••••••">
+      </div>
+      <button type="submit" class="btn btn-primary submit">Увійти →</button>
+    </form>
+
+    <!-- Форма реєстрації -->
+    <form method="POST" class="form {% if reg_form.errors %}show{% endif %}" id="form-reg">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="register">
+      <div>
+        <label class="lbl">Логін</label>
+        <input type="text" name="username" placeholder="mykola_mandrivnyk"
+               value="{{ reg_form.username.value|default:'' }}">
+      </div>
+      <div>
+        <label class="lbl">Пароль</label>
+        <input type="password" name="password1" placeholder="Мінімум 8 символів">
+      </div>
+      <div>
+        <label class="lbl">Пароль ще раз</label>
+        <input type="password" name="password2" placeholder="Повтори пароль">
+      </div>
+      <button type="submit" class="btn btn-accent submit">Зареєструватись →</button>
+    </form>
+
+  </div>
+</div>
+
+<script>
+const msgs = {
+  login: 'З поверненням! 👋<br>Введи логін і пароль.',
+  reg:   'Реєстрація безкоштовна! 🎉<br>Придумай логін і пароль.',
+};
+function sw(tab) {
+  ['login','reg'].forEach(t => {
+    document.getElementById('tab-'+t).classList.toggle('active', t===tab);
+    document.getElementById('form-'+t).classList.toggle('show', t===tab);
+  });
+  document.getElementById('robot-msg').innerHTML = msgs[tab];
+  document.querySelector('#form-'+tab+' input').focus();
+}
+</script>
+{% if login_error %}
+<script>
+  sw('login');
+</script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head><title>Список місць</title></head>
+<body>
+
+  <h2>{{ city.name }}</h2>
+
+  <!-- Форма зміни категорій без перезавантаження списку -->
+  <form method="GET" action="{% url 'place_list' %}">
+    <input type="hidden" name="city" value="{{ city.id }}">
+    {% for value, label in all_categories %}
+      <label>
+        <input type="checkbox" name="category" value="{{ value }}"
+          {% if value in selected_categories %}checked{% endif %}>
+        {{ label }}
+      </label>
+    {% endfor %}
+    <button type="submit">Оновити</button>
+  </form>
+
+  <hr>
+
+  <!-- Форма вибору конкретних місць для маршруту -->
+  <form method="POST" action="{% url 'place_list' %}">
+    {% csrf_token %}
+
+    <p>Вибери заклади для маршруту:</p>
+
+    {% for place in places %}
+      <label style="display:flex; gap:10px; margin-bottom:8px;">
+        <input type="checkbox" name="place_ids" value="{{ place.id }}">
+        <span>
+          {% if place.category == 'cafe' %}☕
+          {% elif place.category == 'restaurant' %}🍽
+          {% elif place.category == 'museum' %}🏛
+          {% endif %}
+        </span>
+        <b>{{ place.name }}</b>
+        <small style="color:gray;">{{ place.get_category_display }}</small>
+      </label>
+    {% empty %}
+      <p>Місць не знайдено. Спробуй іншу категорію.</p>
+    {% endfor %}
+
+    <br>
+    <button type="submit">Побудувати маршрут</button>
+  </form>
+
+</body>
+</html>

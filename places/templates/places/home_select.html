@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head><title>Планувальник маршрутів</title></head>
+<body>
+  <h2>Оберіть місто</h2>
+  <form method="GET" action="{% url 'home_select' %}">
+    <select name="city">
+      {% for city in cities %}
+        <option value="{{ city.id }}">{{ city.name }}</option>
+      {% endfor %}
+    </select>
+
+    <p>Оберіть категорії (можна декілька):</p>
+
+    <label>
+      <input type="checkbox" name="category" value="cafe" checked>
+      Кафе
+    </label><br>
+    <label>
+      <input type="checkbox" name="category" value="restaurant">
+      Ресторани
+    </label><br>
+    <label>
+      <input type="checkbox" name="category" value="museum">
+      Музеї
+    </label><br>
+        <label>
+    <input type="checkbox" name="category" value="bar">
+      Бари
+    </label><br>
+        <input type="checkbox" name="category" value="park">
+      Парки
+    </label><br>
+        <input type="checkbox" name="category" value="landmarks">
+      Пам'ятки
+    </label><br>
+
+    <br>
+    <button type="submit">Показати заклади</button>
+  </form>
+</body>
+</html>
