@@ -3,7 +3,7 @@
 <head><title>Планувальник маршрутів</title></head>
 <body>
   <h2>Оберіть місто</h2>
-  <form method="GET" action="{% url 'home_select' %}">
+  <form method="GET" action="{% url 'place_list' %}">
     <select name="city">
       {% for city in cities %}
         <option value="{{ city.id }}">{{ city.name }}</option>
@@ -24,14 +24,16 @@
       <input type="checkbox" name="category" value="museum">
       Музеї
     </label><br>
-        <label>
-    <input type="checkbox" name="category" value="bar">
+    <label>
+      <input type="checkbox" name="category" value="bar">
       Бари
     </label><br>
-        <input type="checkbox" name="category" value="park">
+    <label>
+      <input type="checkbox" name="category" value="park">
       Парки
     </label><br>
-        <input type="checkbox" name="category" value="landmarks">
+    <label>
+      <input type="checkbox" name="category" value="landmarks">
       Пам'ятки
     </label><br>
 

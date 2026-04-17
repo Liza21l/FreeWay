@@ -7,7 +7,7 @@ CATEGORY_TAGS = {
         'museum':     ('tourism', 'museum'),
         'bar':        ('amenity', 'bar'),
         'park':       ('leisure', 'park'),
-        'landmarks':  ('tourism', 'landmarks'),
+        'landmarks': ('tourism', 'attraction'),
 }
 
 def fetch_places(city: City, categories: list):
@@ -41,7 +41,7 @@ def fetch_places(city: City, categories: list):
         resp = requests.post(
             'https://overpass-api.de/api/interpreter',
             data={'data': query},
-            timeout=25
+            timeout=60
         )
         resp.raise_for_status()
     except requests.RequestException as e:

@@ -6,45 +6,6 @@ from django.contrib import messages
 from .models import City, Place, UserRoute
 from .services import fetch_places
 
-def home(request):
-    # Якщо вже увійшов — відразу на вибір міста
-    if request.user.is_authenticated:
-        return redirect('home_select')
- 
-    login_error = False
-    reg_form    = UserCreationForm()
- 
-    if request.method == 'POST':
-        action = request.POST.get('action')
- 
-        # ── ВХІД ──
-        if action == 'login':
-            username = request.POST.get('username', '').strip()
-            password = request.POST.get('password', '')
-            user = authenticate(request, username=username, password=password)
-            if user:
-                login(request, user)
-                messages.success(request, f'Ласкаво просимо, {user.username}!')
-                return redirect('home_select')
-            else:
-                login_error = True  # покажемо помилку в шаблоні
- 
-        # ── РЕЄСТРАЦІЯ ──
-        elif action == 'register':
-            reg_form = UserCreationForm(request.POST)
-            if reg_form.is_valid():
-                user = reg_form.save()
-                login(request, user)
-                messages.success(request, f'Акаунт створено! Ласкаво просимо, {user.username}!')
-                return redirect('home_select')
-            # якщо форма невалідна — reg_form.errors передається в шаблон,
-            # і таб реєстрації відкриється автоматично
- 
-    return render(request, 'home.html', {
-        'reg_form':    reg_form,
-        'login_error': login_error,
-    })
- 
 @login_required
 def select(request):
     cities = City.objects.all()
@@ -83,8 +44,8 @@ def place_list(request):
         cat for cat in categories
         if not Place.objects.filter(city=city, category=cat).exists()
     ]
-    if missing:
-        fetch_places(city, missing)
+    
+    fetch_places(city, missing)
 
     places = Place.objects.filter(city=city, category__in=categories)
 

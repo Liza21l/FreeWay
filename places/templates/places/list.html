@@ -21,7 +21,7 @@
   <hr>
 
   <!-- Форма вибору конкретних місць для маршруту -->
-  <form method="POST" action="{% url 'place_list' %}">
+  <form method="POST" action="{% url 'build_route' %}">
     {% csrf_token %}
 
     <p>Вибери заклади для маршруту:</p>
