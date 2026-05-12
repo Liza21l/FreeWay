@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head><title>Мої маршрути</title></head>
+<body>
+  <h2>Мої маршрути</h2>
+
+  {% if routes %}
+    <ul>
+      {% for route in routes %}
+        <li>
+          <strong>Маршрут №{{ forloop.counter }}</strong> 
+          (створено {{ route.created_at|date:"d.m.Y H:i" }})
+          <ul>
+            {% for place in route.places.all %}
+              <li>{{ place.name }} — {{ place.category }} ({{ place.address }})</li>
+            {% endfor %}
+          </ul>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>У вас ще немає створених маршрутів.</p>
+  {% endif %}
+
+  <a href="{% url 'home_select' %}">← Повернутися на головну</a>
+</body>
+</html>

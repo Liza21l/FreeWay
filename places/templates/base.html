@@ -239,10 +239,14 @@
   <div class="nav-links">
     {% if user.is_authenticated %}
       <span style="font-size:14px;opacity:.6">Привіт, {{ user.username }}!</span>
-      <a href="/accounts/logout/" class="btn btn-ghost">Вийти</a>
+      <form action="{% url 'logout' %}" method="post" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-ghost">Вийти</button>
+      </form>
+      <a href="{% url 'profile' %}" class="btn btn-ghost">Профіль</a>
     {% else %}
-      <a href="/accounts/login/"    class="btn btn-ghost">Увійти</a>
-      <a href="/accounts/register/" class="btn btn-primary">Реєстрація</a>
+      <a href="{% url 'login' %}" class="btn btn-ghost">Увійти</a>
+      <a href="{% url 'register' %}" class="btn btn-primary">Реєстрація</a>
     {% endif %}
   </div>
 </nav>

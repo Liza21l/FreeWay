@@ -1,7 +1,5 @@
-<!DOCTYPE html>
-<html>
-<head><title>Планувальник маршрутів</title></head>
-<body>
+{% extends "base.html" %}
+{% block content %}
   <h2>Оберіть місто</h2>
   <form method="GET" action="{% url 'place_list' %}">
     <select name="city">
@@ -36,9 +34,12 @@
       <input type="checkbox" name="category" value="landmarks">
       Пам'ятки
     </label><br>
-
-    <br>
+    <label><input type="checkbox" name="category" value="fast_food"> Фастфуд</label><br>
+    <label><input type="checkbox" name="category" value="nightclub"> Нічні клуби</label><br>
+    <label><input type="checkbox" name="category" value="bakery"> Пекарні</label><br>
+    <label><input type="checkbox" name="category" value="supermarket"> Супермаркети</label><br>
+    <label><input type="checkbox" name="category" value="theatre"> Театри</label><br>
+    <label><input type="checkbox" name="category" value="cinema"> Кінотеатри</label><br>
     <button type="submit">Показати заклади</button>
   </form>
-</body>
-</html>
+{% endblock %}

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head><title>Профіль</title></head>
+<body>
+  <h2>Профіль користувача</h2>
+  <p><strong>Ім’я:</strong> {{ user.name }}</p>
+  <p><strong>Username:</strong> {{ user.username }}</p>
+  <p><strong>Email:</strong> {{ user.email }}</p>
+  <p><strong>Телефон:</strong> {{ user.phone }}</p>
+
+  <form method="GET" action="{% url 'user_routes' %}">
+    <button type="submit">Мої маршрути</button>
+  </form>
+</body>
+</html>
