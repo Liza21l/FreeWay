@@ -1,27 +1,114 @@
 <!DOCTYPE html>
 <html>
-<head><title>Мої маршрути</title></head>
+<head>
+  <title>Мої маршрути</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+  <style>
+    .map { height: 400px; width: 100%; margin-bottom: 20px; }
+    .info { padding: 5px; font-size: 14px; }
+  </style>
+</head>
 <body>
   <h2>Мої маршрути</h2>
 
-  {% if routes %}
+  <a href="{% url 'archived_routes' %}">→ Архів завершених</a>
+  <a href="{% url 'all_public_routes' %}">→ Публічні маршрути всіх користувачів</a>
+
+  <h3>Особисті маршрути</h3>
+  {% if private_routes %}
     <ul>
-      {% for route in routes %}
+      {% for route in private_routes %}
         <li>
-          <strong>Маршрут №{{ forloop.counter }}</strong> 
+          <strong>Маршрут №{{ forloop.counter }}</strong>
           (створено {{ route.created_at|date:"d.m.Y H:i" }})
           <ul>
             {% for place in route.places.all %}
               <li>{{ place.name }} — {{ place.category }} ({{ place.address }})</li>
             {% endfor %}
           </ul>
+          <form method="post" action="{% url 'toggle_route_status' route.id %}">
+            {% csrf_token %}
+            {% if route.status == 'active' %}
+              <button type="submit">Завершити</button>
+            {% else %}
+              <button type="submit">Зробити активним</button>
+            {% endif %}
+          </form>
+          </form>
+          <div id="info-{{ route.id }}" class="info">Будуємо маршрут...</div>
+          <div id="map-{{ route.id }}" class="map"></div>
         </li>
       {% endfor %}
     </ul>
   {% else %}
-    <p>У вас ще немає створених маршрутів.</p>
+    <p>Немає особистих маршрутів.</p>
   {% endif %}
 
-  <a href="{% url 'home_select' %}">← Повернутися на головну</a>
+  <h3>Публічні маршрути (ваші)</h3>
+  {% if public_routes %}
+    <ul>
+      {% for route in public_routes %}
+        <li>
+          <strong>Маршрут №{{ forloop.counter }}</strong>
+          (створено {{ route.created_at|date:"d.m.Y H:i" }})
+          <ul>
+            {% for place in route.places.all %}
+              <li>{{ place.name }} — {{ place.category }} ({{ place.address }})</li>
+            {% endfor %}
+          </ul>
+          <form method="post" action="{% url 'toggle_route_status' route.id %}">
+            {% csrf_token %}
+            {% if route.status == 'active' %}
+              <button type="submit">Завершити</button>
+            {% else %}
+              <button type="submit">Зробити активним</button>
+            {% endif %}
+          </form>
+          <div id="info-{{ route.id }}" class="info">Будуємо маршрут...</div>
+          <div id="map-{{ route.id }}" class="map"></div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>Немає публічних маршрутів.</p>
+  {% endif %}
+
+  <!-- один json_script для всіх маршрутів -->
+  {{ routes|json_script:"routes-data" }}
+
+  <a href="{% url 'home' %}">← Повернутися на головну</a>
+
+  <script>
+    const routes = JSON.parse(document.getElementById("routes-data").textContent);
+    routes.forEach(route => {
+      if (route.coords.length > 0) {
+        const map = L.map(`map-${route.id}`).setView([route.coords[0].lat, route.coords[0].lon], 14);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OpenStreetMap" }).addTo(map);
+        route.coords.forEach((place, i) => {
+          L.marker([place.lat, place.lon]).bindPopup(`<b>${i+1}. ${place.name}</b>`).addTo(map);
+        });
+        if (route.coords.length > 1) {
+          const control = L.Routing.control({
+            waypoints: route.coords.map(p => L.latLng(p.lat, p.lon)),
+            router: L.Routing.osrmv1({ serviceUrl: "https://router.project-osrm.org/route/v1", profile: "foot" }),
+            lineOptions: { styles: [{ color: "#4A90E2", weight: 5, opacity: 0.85 }] },
+            createMarker: () => null,
+            show: false,
+          }).addTo(map);
+          control.on("routesfound", (e) => {
+            const r = e.routes[0];
+            const km = (r.summary.totalDistance / 1000).toFixed(2);
+            const min = Math.round(r.summary.totalTime / 60);
+            document.getElementById(`info-${route.id}`).innerHTML =
+              `Маршрут: <b>${km} км</b> | Час пішки: <b>~${min} хв</b>`;
+          });
+        }
+      }
+    });
+  </script>
 </body>
 </html>
+

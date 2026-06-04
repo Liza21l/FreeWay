@@ -1,15 +1,711 @@
 <!DOCTYPE html>
-<html>
-<head><title>Профіль</title></head>
-<body>
-  <h2>Профіль користувача</h2>
-  <p><strong>Ім’я:</strong> {{ user.name }}</p>
-  <p><strong>Username:</strong> {{ user.username }}</p>
-  <p><strong>Email:</strong> {{ user.email }}</p>
-  <p><strong>Телефон:</strong> {{ user.phone }}</p>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Мій профіль</title>
 
-  <form method="GET" action="{% url 'user_routes' %}">
-    <button type="submit">Мої маршрути</button>
-  </form>
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Inter, Arial, sans-serif;
+}
+
+body{
+    background:#f5f5f5;
+}
+
+.container{
+    max-width:430px;
+    margin:auto;
+    background:white;
+    min-height:100vh;
+}
+
+/* HEADER */
+
+.profile-header{
+    background:#163867;
+    padding:30px 24px;
+    color:white;
+    border-bottom-left-radius:30px;
+    border-bottom-right-radius:30px;
+}
+
+.profile-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:30px;
+}
+
+.profile-top h1{
+    font-size:32px;
+    font-weight:800;
+}
+
+.edit-btn{
+    background:rgba(255,255,255,.12);
+    border:none;
+    color:white;
+    padding:14px 20px;
+    border-radius:14px;
+    cursor:pointer;
+    font-size:15px;
+    font-weight:600;
+}
+
+.profile-info{
+    display:flex;
+    align-items:center;
+    gap:18px;
+}
+
+.avatar{
+    width:90px;
+    height:90px;
+    border-radius:24px;
+    background:#4f89d8;
+    border:3px solid rgba(255,255,255,.15);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:36px;
+    font-weight:800;
+}
+
+.user-name{
+    font-size:32px;
+    font-weight:800;
+}
+
+.user-email{
+    margin-top:8px;
+    color:rgba(255,255,255,.8);
+}
+
+.user-date{
+    margin-top:10px;
+    background:rgba(255,255,255,.12);
+    display:inline-block;
+    padding:8px 14px;
+    border-radius:20px;
+    font-size:13px;
+}
+
+/* STATS */
+
+.section-title{
+    padding:30px 24px 15px;
+    color:#9a9a9a;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:1px;
+}
+
+.stats-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+    padding:0 24px;
+}
+
+.stat-card{
+    background:#f3f1eb;
+    border-radius:24px;
+    padding:22px;
+    min-height:160px;
+}
+
+.stat-card.active{
+    background:#edf4ff;
+    border:1px solid #b7d2ff;
+}
+
+.stat-icon{
+    width:46px;
+    height:46px;
+    border-radius:14px;
+    background:white;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:20px;
+}
+
+.stat-number{
+    font-size:48px;
+    font-weight:800;
+    color:#163867;
+    margin-top:25px;
+}
+
+.stat-text{
+    margin-top:8px;
+    color:#888;
+    line-height:1.4;
+}
+
+/* PROGRESS */
+
+.progress-card{
+    margin:20px 24px 30px;
+    background:#f3f1eb;
+    border-radius:24px;
+    padding:24px;
+}
+
+.progress-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.progress-title{
+    color:#163867;
+    font-size:18px;
+    font-weight:700;
+}
+
+.progress-number{
+    font-size:24px;
+    font-weight:800;
+    color:#163867;
+}
+
+.progress-bar{
+    height:8px;
+    background:#ddd;
+    border-radius:20px;
+    margin-top:18px;
+    overflow:hidden;
+}
+
+.progress-fill{
+    width:35%;
+    height:100%;
+    background:#4c85d1;
+    border-radius:20px;
+}
+
+/* MODAL */
+
+.modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.5);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    z-index:999;
+}
+
+.modal-content{
+    width:100%;
+    max-width:430px;
+    background:white;
+    border-radius:28px;
+    padding:25px;
+}
+
+.modal-title{
+    color:#163867;
+    font-size:28px;
+    font-weight:800;
+    margin-bottom:20px;
+}
+
+.form-group{
+    margin-bottom:15px;
+}
+
+.form-group label{
+    display:block;
+    margin-bottom:6px;
+    color:#666;
+    font-size:14px;
+}
+
+.form-group input{
+    width:100%;
+    height:54px;
+    border:1px solid #ddd;
+    border-radius:14px;
+    padding:0 15px;
+    font-size:15px;
+}
+
+.modal-buttons{
+    display:flex;
+    gap:10px;
+    margin-top:20px;
+}
+
+.save-btn{
+    flex:1;
+    height:54px;
+    border:none;
+    border-radius:14px;
+    background:#163867;
+    color:white;
+    font-weight:700;
+    cursor:pointer;
+}
+
+.cancel-btn{
+    flex:1;
+    height:54px;
+    border:none;
+    border-radius:14px;
+    background:#ececec;
+    cursor:pointer;
+}
+.friends-section{
+    padding:0 24px 30px;
+}
+
+.friends-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:24px;
+    margin-top: 15px;
+}
+
+.section-title-small{
+    color:#999;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:1px;
+}
+
+.all-friends{
+    text-decoration:none;
+    color:#3565a8;
+    font-weight:600;
+}
+
+.friend-card{
+    background:#f3f1eb;
+    border-radius:20px;
+    padding:16px;
+    margin-bottom:12px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.friend-left{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.friend-avatar{
+    width:46px;
+    height:46px;
+    border-radius:14px;
+
+    background:linear-gradient(
+        135deg,
+        #5d9cff,
+        #3f74c5
+    );
+
+    color:white;
+    font-weight:700;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.friend-name{
+    font-weight:700;
+    color:#163867;
+}
+
+.friend-info{
+    font-size:13px;
+    color:#888;
+    margin-top:3px;
+}
+
+.friend-routes{
+    background:#e4efff;
+    color:#3565a8;
+
+    padding:8px 12px;
+
+    border-radius:12px;
+
+    font-size:13px;
+    font-weight:700;
+
+.back-friends-btn{
+    border:none;
+    background:#163867;
+    color:white;
+
+    padding:12px 18px;
+
+    border-radius:12px;
+
+    cursor:pointer;
+
+    margin-bottom:15px;
+}}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- HEADER -->
+
+    <div class="profile-header">
+
+        <div class="profile-top">
+
+            <h1>Мій профіль</h1>
+
+            <button class="edit-btn" onclick="openModal()">
+                ✎ Редагувати
+            </button>
+
+        </div>
+
+        <div class="profile-info">
+
+            <div class="avatar">
+                {{ user.name|first|upper }}{{ user.username|first|upper }}
+            </div>
+
+            <div>
+
+                <div class="user-name">
+                    {{ user.first_name }}
+                </div>
+
+                <div class="user-email">
+                    {{ user.email }}
+                </div>
+
+                <div class="user-date">
+                    📅 З нами з {{ member_since|default:user.date_joined|date:"F Y" }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- STATS -->
+    <div id="statsSection">
+      <div class="section-title">
+          СТАТИСТИКА
+      </div>
+
+      <div class="stats-grid">
+
+          <div class="stat-card active">
+
+              <div class="stat-icon">📍</div>
+
+              <div class="stat-number">
+                  {{ completed_count }}
+              </div>
+
+              <div class="stat-text">
+                  Маршрутів пройдено
+              </div>
+
+          </div>
+
+          <div class="stat-card">
+
+              <div class="stat-icon">☕</div>
+
+              <div class="stat-number">
+                  {{ places_count }}
+              </div>
+
+              <div class="stat-text">
+                  Закладів відвідано
+              </div>
+
+          </div>
+
+          <div class="stat-card">
+
+              <div class="stat-icon">👥</div>
+
+              <div class="stat-number">
+                  {{ friends_count|default:"0" }}
+              </div>
+
+              <div class="stat-text">
+                  Друзів по маршруту
+              </div>
+
+          </div>
+
+          <div class="stat-card">
+
+              <div class="stat-icon">✔</div>
+
+              <div class="stat-number">
+                  {{ total_km }}
+              </div>
+
+              <div class="stat-text">
+                  км загалом
+              </div>
+
+          </div>
+
+      </div>
+    </div>
+    <div class="friends-section">
+
+      <div class="friends-header">
+
+          <div class="section-title-small">
+              ДРУЗІ ПО МАРШРУТУ
+          </div>
+
+          <a href="#"
+            class="all-friends"
+            onclick="showAllFriends()">
+              Всі {{ friends_count }}
+          </a>
+
+      </div>
+
+      <!-- Перші 3 друзі -->
+
+      <div id="profileContent">
+
+          {% for friend in friends_list|slice:":3" %}
+              <div class="friend-card">
+
+                  <div class="friend-left">
+
+                      <div class="friend-avatar">
+                          {{ friend.name|slice:":2"|upper }}
+                      </div>
+
+                      <div>
+
+                          <div class="friend-name">
+                              {{ friend.name }}
+                          </div>
+
+                          <div class="friend-info">
+                              Останній маршрут:
+                              {{ friend.last_route }}
+                          </div>
+
+                      </div>
+
+                  </div>
+
+                  <div class="friend-routes">
+                      {{ friend.routes_count }} марш.
+                  </div>
+
+              </div>
+          {% endfor %}
+
+      </div>
+
+      <!-- Всі друзі -->
+
+      <div id="allFriendsPage" style="display:none;">
+
+          <div class="friends-header">
+
+              <button class="back-friends-btn"
+                      onclick="hideAllFriends()">
+                  ← Назад
+              </button>
+
+          </div>
+
+          {% for friend in friends_list %}
+
+              <div class="friend-card">
+
+                  <div class="friend-left">
+
+                      <div class="friend-avatar">
+                          {{ friend.name|slice:":2"|upper }}
+                      </div>
+
+                      <div>
+
+                          <div class="friend-name">
+                              {{ friend.name }}
+                          </div>
+
+                          <div class="friend-info">
+                              Останній маршрут:
+                              {{ friend.last_route }}
+                          </div>
+
+                      </div>
+
+                  </div>
+
+                  <div class="friend-routes">
+                      {{ friend.routes_count }} марш.
+                  </div>
+
+              </div>
+
+          {% endfor %}
+
+      </div>
+
+    </div>
+
+</div>
+
+<!-- MODAL -->
+
+<div class="modal" id="editModal">
+
+    <div class="modal-content">
+
+        <div class="modal-title">
+            Редагування профілю
+        </div>
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+            <div class="form-group">
+
+                <label>Ім’я</label>
+
+                <input
+                    type="text"
+                    name="name"
+                    value="{{ user.name }}"
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label>Username</label>
+
+                <input
+                    type="text"
+                    name="username"
+                    value="{{ user.username }}"
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label>Email</label>
+
+                <input
+                    type="email"
+                    name="email"
+                    value="{{ user.email }}"
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label>Телефон</label>
+
+                <input
+                    type="text"
+                    name="phone"
+                    value="{{ user.phone }}"
+                >
+
+            </div>
+
+            <div class="modal-buttons">
+
+                <button
+                    type="submit"
+                    class="save-btn"
+                >
+                    Зберегти
+                </button>
+
+                <button
+                    type="button"
+                    class="cancel-btn"
+                    onclick="closeModal()"
+                >
+                    Скасувати
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script>
+
+function openModal(){
+    document.getElementById("editModal").style.display = "flex";
+}
+
+function closeModal(){
+    document.getElementById("editModal").style.display = "none";
+}
+
+window.onclick = function(event){
+
+    const modal = document.getElementById("editModal");
+
+    if(event.target === modal){
+        closeModal();
+    }
+}
+function showAllFriends(){
+
+    document.getElementById("statsSection").style.display = "none";
+
+    document.getElementById("profileContent").style.display = "none";
+
+    document.getElementById("allFriendsPage").style.display = "block";
+}
+
+function hideAllFriends(){
+
+    document.getElementById("statsSection").style.display = "block";
+
+    document.getElementById("profileContent").style.display = "block";
+
+    document.getElementById("allFriendsPage").style.display = "none";
+}
+
+</script>
+
 </body>
 </html>

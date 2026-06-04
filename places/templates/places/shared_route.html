@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="uk">
 <head>
-  <title>Маршрут</title>
+  <meta charset="UTF-8">
+  <title>Маршрут {{ route.id }}</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -13,8 +14,15 @@
 </head>
 <body>
 
+  <h2>Маршрут від {{ route.user.first_name }}</h2>
+
   <div id="info">Будуємо маршрут по вулицях...</div>
   <div id="map"></div>
+
+  <form method="POST">
+    {% csrf_token %}
+    <button type="submit">➕ Додати до моїх маршрутів</button>
+  </form>
 
   {{ coords|json_script:"coords-data" }}
 
@@ -23,12 +31,10 @@
 
     const map = L.map('map').setView([coords[0].lat, coords[0].lon], 14);
 
-    // Тайли OpenStreetMap — карта з вулицями
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap'
     }).addTo(map);
 
-    // Кольорові маркери по категоріях
     const COLORS = { cafe: '#E8793A', restaurant: '#E84A4A', museum: '#4A90E2' };
 
     coords.forEach((place, i) => {
@@ -48,22 +54,20 @@
         .addTo(map);
     });
 
-    // Маршрут по вулицях через OSRM
     if (coords.length > 1) {
       const control = L.Routing.control({
         waypoints: coords.map(p => L.latLng(p.lat, p.lon)),
         router: L.Routing.osrmv1({
           serviceUrl: 'https://router.project-osrm.org/route/v1',
-          profile: 'foot',   // пішки. 'driving' або 'cycling' теж працює
+          profile: 'foot',
         }),
         lineOptions: {
           styles: [{ color: '#4A90E2', weight: 5, opacity: 0.85 }]
         },
-        createMarker: () => null,  // прибираємо дублікати маркерів
-        show: false,               // ховаємо панель покрокових інструкцій
+        createMarker: () => null,
+        show: false,
       }).addTo(map);
 
-      // Виводимо відстань і час після побудови
       control.on('routesfound', (e) => {
         const r   = e.routes[0];
         const km  = (r.summary.totalDistance / 1000).toFixed(2);

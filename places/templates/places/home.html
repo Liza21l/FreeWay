@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FreeWay</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, sans-serif;
+        }
+
+        body{
+            background:#f5f5f5;
+            padding:20px;
+        }
+
+        .container{
+            max-width:430px;
+            margin:auto;
+            background:white;
+            border-radius:35px;
+            overflow:hidden;
+            border:1px solid #e8e8e8;
+        }
+
+        /* HEADER */
+
+        .header{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:24px 20px;
+            border-bottom:1px solid #ececec;
+            position:relative;
+        }
+
+        .logo{
+            display:flex;
+            align-items:center;
+            gap:12px;
+        }
+
+        .logo-icon{
+            width:38px;
+            height:38px;
+            border-radius:12px;
+            background:#edf4ff;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:#163867;
+            font-weight:700;
+            font-size:20px;
+        }
+
+        .logo-text{
+            font-size:18px;
+            font-weight:700;
+            color:#163867;
+        }
+
+        /* MENU */
+
+        .menu-btn{
+            width:44px;
+            height:44px;
+            border-radius:12px;
+            border:none;
+            background:#f7f7f7;
+            cursor:pointer;
+
+            display:flex;
+            flex-direction:column;
+            justify-content:center;
+            align-items:center;
+            gap:5px;
+        }
+
+        .menu-btn span{
+            width:20px;
+            height:2px;
+            background:#333;
+            border-radius:10px;
+        }
+
+        .dropdown-menu{
+            position:absolute;
+            top:80px;
+            right:20px;
+            background:white;
+            border-radius:18px;
+            box-shadow:0 6px 25px rgba(0,0,0,0.08);
+            padding:10px;
+            width:220px;
+            display:none;
+            z-index:1000;
+        }
+
+        .dropdown-menu a{
+            display:block;
+            padding:14px 16px;
+            border-radius:12px;
+            text-decoration:none;
+            color:#163867;
+            font-weight:600;
+            transition:0.3s;
+        }
+
+        .dropdown-menu a:hover{
+            background:#edf4ff;
+        }
+
+        /* HERO */
+
+        .hero{
+            padding:30px 20px;
+        }
+
+        .badge{
+            display:inline-block;
+            background:#edf4ff;
+            color:#3f6cb1;
+            padding:10px 16px;
+            border-radius:30px;
+            font-size:13px;
+            font-weight:600;
+            margin-bottom:22px;
+        }
+
+        .hero-title{
+            font-size:28px;
+            line-height:1.2;
+            color:#163867;
+            font-weight:800;
+            margin-bottom:18px;
+        }
+
+        .hero-title span{
+            color:#3f6cb1;
+        }
+
+        .hero-text{
+            color:#777;
+            font-size:17px;
+            line-height:1.7;
+            margin-bottom:30px;
+        }
+
+        /* BUTTONS */
+
+        .main-btn {
+            display: inline-block;       /* робимо <a> як блок-кнопку */
+            text-align: center;          /* текст по центру */
+            line-height: 58px;           /* вирівнювання тексту по висоті */
+            width: 100%;
+            height: 58px;
+            border-radius: 18px;
+            background: #163867;
+            color: white;
+            font-size: 17px;
+            font-weight: 600;
+            text-decoration: none;       /* прибираємо підкреслення */
+            cursor: pointer;
+            margin-bottom: 14px;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .main-btn:hover {
+            background: #1d4a99;         /* ефект при наведенні */
+            transform: translateY(-2px); /* легкий підйом */
+        }
+
+
+        .secondary-btn{
+            width:100%;
+            height:58px;
+            border:none;
+            border-radius:18px;
+            background:#f1efea;
+            color:#555;
+            font-size:17px;
+            font-weight:600;
+            cursor:pointer;
+        }
+
+        /* MAP CARD */
+
+        .map-card{
+            margin:25px 20px;
+            border-radius:24px;
+            overflow:hidden;
+            border:1px solid #ececec;
+            background:white;
+        }
+
+        .map-header{
+            display:flex;
+            justify-content:space-between;
+            padding:18px;
+            font-size:14px;
+            font-weight:600;
+            color:#777;
+        }
+
+        .map-link{
+            color:#3f6cb1;
+        }
+
+        #map{
+            width:100%;
+            height:280px;
+        }
+
+        .stats{
+            display:grid;
+            grid-template-columns:1fr 1fr 1fr;
+            border-top:1px solid #ececec;
+        }
+
+        .stat{
+            padding:16px;
+            text-align:center;
+        }
+
+        .stat:not(:last-child){
+            border-right:1px solid #ececec;
+        }
+
+        .stat-number{
+            font-size:28px;
+            color:#163867;
+            font-weight:800;
+        }
+
+        .stat-text{
+            color:#888;
+            font-size:14px;
+            margin-top:4px;
+        }
+
+        /* FEATURES */
+
+        .features{
+            padding:20px;
+        }
+
+        .features-grid{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:14px;
+            margin-bottom:35px;
+        }
+
+        .feature-box{
+            background:#f1efea;
+            border-radius:22px;
+            padding:22px;
+        }
+
+        .feature-number{
+            font-size:42px;
+            font-weight:800;
+            color:#163867;
+            margin-top:18px;
+        }
+
+        .feature-text{
+            color:#8b8b8b;
+            margin-top:6px;
+            line-height:1.5;
+        }
+
+        .section-subtitle{
+            color:#4c76b4;
+            font-weight:700;
+            letter-spacing:1px;
+            margin-bottom:10px;
+        }
+
+        .section-title{
+            font-size:26px;
+            color:#163867;
+            font-weight:800;
+            margin-bottom:25px;
+        }
+
+        /* CATEGORY CARDS */
+
+        .categories-grid{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:14px;
+            margin-bottom:40px;
+        }
+
+        .category-card{
+            background:white;
+            border:1.5px solid #ececec;
+            border-radius:22px;
+            padding:22px;
+            transition:0.3s;
+        }
+
+        .category-icon{
+            width:56px;
+            height:56px;
+            border-radius:16px;
+            background:#f4f4f4;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:26px;
+            margin-bottom:18px;
+        }
+
+        .category-name{
+            font-size:18px;
+            font-weight:700;
+            color:#444;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- HEADER -->
+
+    <div class="header">
+
+        <div class="logo">
+            <div class="logo-icon">A</div>
+            <div class="logo-text">FreeWay</div>
+        </div>
+
+        <button class="menu-btn" id="menuBtn">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <!-- MENU -->
+
+        <div class="dropdown-menu" id="dropdownMenu">
+
+            <a href="{% url 'profile' %}">
+                👤 Профіль
+            </a>
+
+            <a href="{% url 'user_routes' %}">
+                🗺️ Мої маршрути
+            </a>
+
+            <a href="{% url 'all_public_routes' %}">
+                🌍 Публічні маршрути
+            </a>
+
+            <a href="{% url 'logout' %}">
+                🚪 Вийти
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- HERO -->
+
+    <div class="hero">
+
+        <div class="badge">
+            • Швидко • Зручно • Безкоштовно
+        </div>
+
+        <div class="hero-title">
+            Твій маршрут —
+            <span>наша відповідальність.</span>
+        </div>
+
+        <div class="hero-text">
+            Знаходимо найкращі місця поруч і будуємо
+            оптимальний маршрут за лічені секунди.
+        </div>
+
+        <a class="main-btn" href="{% url 'choose_route' %}">📍Побудувати маршрут</a>
+
+    </div>
+
+    <!-- MAP -->
+
+    {% if latest_route %}
+
+    <div class="map-card">
+
+        <div class="map-header">
+
+            <span>
+                Поточний маршрут
+            </span>
+
+        </div>
+
+        <div id="map"></div>
+
+        <div class="stats">
+
+            <div class="stat">
+
+                <div class="stat-number" id="distance">
+                    0 км
+                </div>
+
+                <div class="stat-text">
+                    Відстань
+                </div>
+
+            </div>
+
+            <div class="stat">
+
+                <div class="stat-number" id="time">
+                    0 хв
+                </div>
+
+                <div class="stat-text">
+                    Пішки
+                </div>
+
+            </div>
+
+            <div class="stat">
+
+                <div class="stat-number">
+                    {{ coords|length }}
+                </div>
+
+                <div class="stat-text">
+                    Зупинки
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+    <!-- FEATURES -->
+
+    <div class="features">
+
+        <div class="features-grid">
+
+            <div class="feature-box">
+                📍
+                <div class="feature-number">8</div>
+                <div class="feature-text">
+                    типів місць для пошуку
+                </div>
+            </div>
+
+            <div class="feature-box">
+                🕒
+                <div class="feature-number">2 с</div>
+                <div class="feature-text">
+                    і маршрут готовий
+                </div>
+            </div>
+
+            <div class="feature-box">
+                ✔
+                <div class="feature-number">100%</div>
+                <div class="feature-text">
+                    безкоштовно
+                </div>
+            </div>
+
+            <div class="feature-box">
+                📱
+                <div class="feature-number">3</div>
+                <div class="feature-text">
+                    iOS · Android · Web
+                </div>
+            </div>
+
+        </div>
+
+        <div class="section-subtitle">
+            ЧОМУ FREEWAY
+        </div>
+
+        <div class="section-title">
+            Все просто і зручно
+        </div>
+
+        <!-- CATEGORIES -->
+
+        <div class="categories-grid">
+
+            <div class="category-card active">
+
+                <div class="category-icon">
+                    ☕
+                </div>
+
+                <div class="category-name">
+                    Кафе
+                </div>
+
+            </div>
+
+            <div class="category-card">
+
+                <div class="category-icon">
+                    🍽️
+                </div>
+
+                <div class="category-name">
+                    Ресторани
+                </div>
+
+            </div>
+
+            <div class="category-card">
+
+                <div class="category-icon">
+                    🌳
+                </div>
+
+                <div class="category-name">
+                    Парки
+                </div>
+
+            </div>
+
+            <div class="category-card">
+
+                <div class="category-icon">
+                    🎬
+                </div>
+
+                <div class="category-name">
+                    Кінотеатри
+                </div>
+
+            </div>
+
+            <div class="category-card">
+
+                <div class="category-icon">
+                    🏛️
+                </div>
+
+                <div class="category-name">
+                    Музеї
+                </div>
+
+            </div>
+
+            <div class="category-card">
+
+                <div class="category-icon">
+                    💊
+                </div>
+
+                <div class="category-name">
+                    Аптеки
+                </div>
+
+            </div>
+
+            <div class="category-card">
+
+                <div class="category-icon">
+                    🏧
+                </div>
+
+                <div class="category-name">
+                    Банкомати
+                </div>
+
+            </div>
+
+            <div class="category-card">
+
+                <div class="category-icon">
+                    🛒
+                </div>
+
+                <div class="category-name">
+                    Супермаркети
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% if latest_route %}
+
+{{ coords|json_script:"coords-data" }}
+
+<script>
+
+    const coords = JSON.parse(
+        document.getElementById('coords-data').textContent
+    );
+
+    const map = L.map('map').setView(
+        [coords[0].lat, coords[0].lon],
+        14
+    );
+
+    L.tileLayer(
+        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        {
+            attribution:'© OpenStreetMap'
+        }
+    ).addTo(map);
+
+    const COLORS = {
+        cafe:'#E8793A',
+        restaurant:'#E84A4A',
+        museum:'#4A90E2'
+    };
+
+    coords.forEach((place, i) => {
+
+        const color = COLORS[place.category] || '#163867';
+
+        const icon = L.divIcon({
+
+            html: `
+                <div style="
+                    background:${color};
+                    color:#fff;
+                    border-radius:50%;
+                    width:30px;
+                    height:30px;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    font-weight:bold;
+                    border:2px solid white;
+                ">
+                    ${i + 1}
+                </div>
+            `,
+
+            iconSize:[30,30],
+            iconAnchor:[15,15]
+
+        });
+
+        L.marker(
+            [place.lat, place.lon],
+            { icon }
+        ).addTo(map);
+
+    });
+
+    if(coords.length > 1){
+
+        const control = L.Routing.control({
+
+            waypoints: coords.map(
+                p => L.latLng(p.lat, p.lon)
+            ),
+
+            router: L.Routing.osrmv1({
+                serviceUrl:
+                'https://router.project-osrm.org/route/v1',
+                profile:'foot'
+            }),
+
+            lineOptions:{
+                styles:[{
+                    color:'#4A90E2',
+                    weight:5,
+                    opacity:0.85
+                }]
+            },
+
+            createMarker:() => null,
+            show:false,
+            container:null
+
+        }).addTo(map);
+
+        control.on('routesfound', (e) => {
+
+            const r = e.routes[0];
+
+            const km = (
+                r.summary.totalDistance / 1000
+            ).toFixed(1);
+
+            const min = Math.round(
+                r.summary.totalTime / 60
+            );
+
+            document.getElementById('distance')
+                .innerHTML = km + " км";
+
+            document.getElementById('time')
+                .innerHTML = min + " хв";
+
+        });
+
+    }
+
+</script>
+
+{% endif %}
+
+<script>
+
+    const menuBtn = document.getElementById("menuBtn");
+    const dropdownMenu = document.getElementById("dropdownMenu");
+
+    menuBtn.addEventListener("click", () => {
+
+        if(dropdownMenu.style.display === "block"){
+            dropdownMenu.style.display = "none";
+        }else{
+            dropdownMenu.style.display = "block";
+        }
+
+    });
+
+    window.addEventListener("click", function(e){
+
+        if(
+            !menuBtn.contains(e.target) &&
+            !dropdownMenu.contains(e.target)
+        ){
+            dropdownMenu.style.display = "none";
+        }
+
+    });
+
+</script>
+
+</body>
+</html>

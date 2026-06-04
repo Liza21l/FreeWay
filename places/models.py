@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import User
@@ -19,31 +20,48 @@ class City(models.Model):
 
 class Place(models.Model):
     CATEGORY_CHOICES = [
-        ('cafe',       'Кафе'),
-        ('restaurant', 'Ресторан'),
-        ('museum',     'Музей'),
-        ('fast_food',   'Фастфуд'),
-        ('bar',         'Бар'),
-        ('supermarket', 'Супермаркет'),
-        ('nightclub',   'Нічний клуб'),
-        ('bakery',      'Пекарня'),
-        ('theatre',     'Театр'),
-        ('cinema',      'Кінотеатр'),
-        ('park',        'Парк'),
-        ('landmarks',   'Пам’ятки'),
-    ]
+    ('cafe', 'Кафе'),
+    ('restaurant', 'Ресторан'),
+    ('museum', 'Музей'),
+    ('meal_takeaway', 'Фастфуд'),   
+    ('bar', 'Бар'),
+    ('supermarket', 'Супермаркет'),
+    ('night_club', 'Нічний клуб'),      
+    ('bakery', 'Пекарня'),
+    ('movie_theater', 'Кінотеатр/Театр'), 
+    ('park', 'Парк'),
+    ('tourist_attraction', 'Пам’ятки'), 
+]
     name     = models.CharField(max_length=200)
     city     = models.ForeignKey(City, on_delete=models.CASCADE)
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
     lat      = models.FloatField()
     lon      = models.FloatField()
+    rating   = models.FloatField(blank=True, null=True) 
     address  = models.CharField(max_length=300, blank=True)
 
     def __str__(self):
         return self.name
 
 class UserRoute(models.Model):
+    STATUS_CHOICES = [
+        ('active', 'Активний'),
+        ('completed', 'Завершений'),
+    ]
+    VISIBILITY_CHOICES = [
+        ('private', 'Особистий'),
+        ('public', 'Публічний'),
+    ]
+
     user       = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     places     = models.ManyToManyField(Place)
     created_at = models.DateTimeField(auto_now_add=True)
+    status     = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    visibility  = models.CharField(max_length=20, choices=VISIBILITY_CHOICES, default='private')
+    distance_km = models.FloatField(default=0)
+    share_uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    friends = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="friend_routes", blank=True)
+
+    def __str__(self):
+        return f"Маршрут {self.id} ({self.get_status_display()}, {self.get_visibility_display()})"
 

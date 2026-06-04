@@ -1,97 +1,75 @@
 import requests
 from .models import City, Place
+import os
 
-CATEGORY_TAGS = {
-    'cafe':         ('amenity', 'cafe'),
-    'fast_food':    ('amenity', 'fast_food'),
-    'restaurant':   ('amenity', 'restaurant'),
-    'museum':       ('tourism', 'museum'),
-    'bar':          ('amenity', 'bar'),
-    'nightclub':    ('amenity', 'nightclub'),
-    'park':         ('leisure', 'park'),
-    'landmarks':    ('tourism', 'attraction'),
-    'bakery':       ('shop', 'bakery'),
-    'supermarket':  ('shop', 'supermarket'),
-    'theatre':      ('amenity', 'theatre'),
-    'cinema':       ('amenity', 'cinema'),
-}
+# 🔑 Google Places API ключ
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")   # встав свій ключ тут
 
-# список серверів без російського дзеркала
-OVERPASS_SERVERS = [
-    "https://overpass-api.de/api/interpreter",
-    "https://overpass.kumi.systems/api/interpreter",
-    "https://overpass.openstreetmap.fr/api/interpreter",
+# 📍 Категорії для вибору (UI → Google Places types)
+GOOGLE_CATEGORIES = [
+    ('cafe', 'Кафе'),
+    ('restaurant', 'Ресторан'),
+    ('museum', 'Музей'),
+    ('meal_takeaway', 'Фастфуд'),   
+    ('bar', 'Бар'),
+    ('supermarket', 'Супермаркет'),
+    ('night_club', 'Нічний клуб'),      
+    ('bakery', 'Пекарня'),
+    ('movie_theater', 'Кінотеатр/Театр'), 
+    ('park', 'Парк'),
+    ('tourist_attraction', 'Пам’ятки'), 
 ]
+
+# ==========================
+# Google Places API функція
+# ==========================
 
 def fetch_places(city: City, categories: list):
     """
-    Завантажує місця з Overpass API одним запитом
-    для всіх вибраних категорій одночасно.
+    Завантажує місця з Google Places API для вибраних категорій.
     Зберігає в БД. Повторний виклик не дублює дані.
     """
 
-    union_parts = []
+    api_key = GOOGLE_API_KEY
+    print("Запитую Google Places для:", city.name, categories)
+
     for cat in categories:
-        if cat not in CATEGORY_TAGS:
-            continue
-        key, val = CATEGORY_TAGS[cat]
-        union_parts.append(
-            f'node["{key}"="{val}"](around:1000,{city.lat},{city.lon});'
-            f'way["{key}"="{val}"](around:1000,{city.lat},{city.lon});'
-            f'relation["{key}"="{val}"](around:1000,{city.lat},{city.lon});'
-        )
+        url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
+        params = {
+            "location": f"{city.lat},{city.lon}",
+            "radius": 5000,   # радіус у метрах
+            "type": cat,      # напряму Google Places type
+            "key": api_key,
+        }
+        resp = requests.get(url, params=params).json()
+        print("Отримано результатів:", len(resp.get("results", [])))
 
-    if not union_parts:
-        return
-
-    query = f"""
-    [out:json][timeout:25];
-    (
-        {''.join(union_parts)}
-    );
-    out center;
-    """
-    print("Overpass query:", query)
-
-    resp = None
-    for server in OVERPASS_SERVERS:
         try:
-            resp = requests.post(server, data={'data': query}, timeout=60)
+            resp = requests.get(url, params=params, timeout=30)
             resp.raise_for_status()
-            print(f"Успішний запит до {server}")
-            break
+            data = resp.json()
         except requests.RequestException as e:
-            print(f"Overpass помилка на {server}: {e}")
-            resp = None
-
-    if not resp:
-        return
-
-    # Зворотний словник для визначення категорії
-    TAG_TO_CAT = {(k, v): cat for cat, (k, v) in CATEGORY_TAGS.items()}
-
-    for el in resp.json().get('elements', []):
-        tags = el.get('tags', {})
-        name = tags.get('name', '').strip()
-        if not name:
+            print(f"Google Places помилка: {e}")
             continue
 
-        category = None
-        for key, val in tags.items():
-            if (key, val) in TAG_TO_CAT:
-                category = TAG_TO_CAT[(key, val)]
-                break
+        for el in data.get("results", []):
+            name = el.get("name")
+            lat = el["geometry"]["location"]["lat"]
+            lon = el["geometry"]["location"]["lng"]
+            address = el.get("vicinity", "")
+            rating = el.get("rating", None)
 
-        if not category:
-            continue
+            if not name:
+                continue
 
-        Place.objects.get_or_create(
-            name=name,
-            city=city,
-            category=category,
-            defaults={
-                'lat': el.get('lat') or el.get('center', {}).get('lat'),
-                'lon': el.get('lon') or el.get('center', {}).get('lon'),
-                'address': tags.get('addr:street', ''),
-            }
-        )
+            Place.objects.get_or_create(
+                name=name,
+                city=city,
+                category=cat,
+                defaults={
+                    "lat": lat,
+                    "lon": lon,
+                    "address": address,
+                    "rating": rating,
+                }
+            )

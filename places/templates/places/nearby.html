@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <title>Найближчі місця</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+</head>
+<body>
+  <h1>Побудова маршруту</h1>
+
+  <form id="categories-form">
+    <label><input type="checkbox" name="categories" value="restaurant"> Ресторан</label>
+    <label><input type="checkbox" name="categories" value="cafe"> Кафе</label>
+    <label><input type="checkbox" name="categories" value="bar"> Бар</label>
+    <label><input type="checkbox" name="categories" value="park"> Парки</label>
+    <label><input type="checkbox" name="categories" value="museum"> Музей</label>
+    <label><input type="checkbox" name="categories" value="tourist_attraction"> Пам'ятки</label>
+    <label><input type="checkbox" name="categories" value="fast_food"> Фастфуд</label>
+    <label><input type="checkbox" name="categories" value="night_club"> Нічні клуби</label>
+    <label><input type="checkbox" name="categories" value="bakery"> Пекарні</label>
+    <label><input type="checkbox" name="categories" value="supermarket"> Супермаркети</label>
+    <label><input type="checkbox" name="categories" value="movie_theater"> Театри/Кінотеатри</label>
+
+    <button type="submit">Знайти</button>
+  </form>
+
+  <div id="map" style="height:500px; margin-top:20px;"></div>
+  <div id="info"></div>
+
+  <script>
+    let userLat, userLon;
+
+    // 1. Запит геолокації
+    navigator.geolocation.getCurrentPosition(pos => {
+      userLat = pos.coords.latitude;
+      userLon = pos.coords.longitude;
+    }, err => {
+      alert("Не вдалося отримати геолокацію: " + err.message);
+    });
+
+    // 2. Вибір категорій і запит до Django
+    document.getElementById("categories-form").addEventListener("submit", e => {
+      e.preventDefault();
+      const categories = Array.from(document.querySelectorAll("input[name=categories]:checked"))
+                              .map(cb => cb.value);
+
+      fetch("{% url 'nearby_places' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify({ lat: userLat, lon: userLon, categories: categories })
+      })
+      .then(res => res.json())
+      .then(data => {
+        const places = data.places;
+        if (places.length === 0) {
+          document.getElementById("info").innerHTML = "Немає місць у вибраних категоріях.";
+          return;
+        }
+
+        const map = L.map("map").setView([userLat, userLon], 14);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: "© OpenStreetMap"
+        }).addTo(map);
+
+        // Маркер старту (користувач)
+        L.marker([userLat, userLon]).bindPopup("Ви тут").addTo(map);
+
+        // Маркери закладів
+        places.forEach((p, i) => {
+          L.marker([p.lat, p.lon]).bindPopup(`${i+1}. ${p.name} (${p.category})`).addTo(map);
+        });
+
+        // Маршрут: стартова точка + заклади
+        const waypoints = [L.latLng(userLat, userLon)].concat(
+          places.map(p => L.latLng(p.lat, p.lon))
+        );
+
+        L.Routing.control({
+          waypoints: waypoints,
+          router: L.Routing.osrmv1({ serviceUrl: "https://router.project-osrm.org/route/v1", profile: "foot" }),
+          lineOptions: { styles: [{ color: "#4A90E2", weight: 5, opacity: 0.85 }] },
+          createMarker: () => null,
+          show: false,
+          container: null
+        }).addTo(map);
+      });
+    });
+  </script>
+</body>
+</html>

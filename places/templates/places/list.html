@@ -1,50 +1,503 @@
 <!DOCTYPE html>
-<html>
-<head><title>Список місць</title></head>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Список місць</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, sans-serif;
+        }
+
+        body{
+            background:#f5f5f5;
+            padding:20px;
+        }
+
+        .container{
+            max-width:430px;
+            margin:auto;
+            background:white;
+            border-radius:30px;
+            padding:25px 18px;
+            box-shadow:0 4px 20px rgba(0,0,0,0.05);
+        }
+
+        /* КРОКИ */
+
+        .steps{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:35px;
+            position:relative;
+        }
+
+        .steps::before{
+            content:"";
+            position:absolute;
+            top:18px;
+            left:55px;
+            right:55px;
+            height:2px;
+            background:#e4e4e4;
+            z-index:1;
+        }
+
+        .step{
+            position:relative;
+            z-index:2;
+            text-align:center;
+            flex:1;
+        }
+
+        .circle{
+            width:38px;
+            height:38px;
+            border-radius:50%;
+            background:#e9e9e9;
+            color:#888;
+            margin:0 auto 8px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-weight:700;
+            transition:0.3s;
+        }
+
+        .completed .circle{
+            background:#163867;
+            color:white;
+        }
+
+        .active .circle{
+            border:3px solid #163867;
+            color:#163867;
+            background:white;
+        }
+
+        .step p{
+            font-size:13px;
+            color:#666;
+            font-weight:600;
+        }
+
+        /* HEADER */
+
+        .city-title{
+            font-size:30px;
+            font-weight:700;
+            color:#163867;
+            margin-bottom:8px;
+        }
+
+        .subtitle{
+            color:#8b8b8b;
+            margin-bottom:25px;
+            font-size:14px;
+        }
+
+        /* КАТЕГОРІЇ */
+
+        .categories-form{
+            margin-bottom:30px;
+        }
+
+        .categories-scroll{
+            display:flex;
+            gap:10px;
+            overflow-x:auto;
+            padding-bottom:5px;
+        }
+
+        .categories-scroll::-webkit-scrollbar{
+            display:none;
+        }
+
+        .category-pill input{
+            display:none;
+        }
+
+        .category-pill label{
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            white-space:nowrap;
+            padding:12px 18px;
+            border-radius:30px;
+            background:#f3f3f3;
+            cursor:pointer;
+            border:1.5px solid transparent;
+            transition:0.3s;
+            font-size:14px;
+            font-weight:600;
+            color:#666;
+        }
+
+        .category-pill input:checked + label{
+            background:#163867;
+            color:white;
+        }
+
+        .update-btn{
+            margin-top:18px;
+            width:100%;
+            height:52px;
+            border:none;
+            border-radius:16px;
+            background:#163867;
+            color:white;
+            font-size:16px;
+            font-weight:600;
+            cursor:pointer;
+        }
+
+        /* МІСЦЯ */
+
+        .places-title{
+            font-size:22px;
+            font-weight:700;
+            color:#163867;
+            margin-bottom:18px;
+        }
+
+        .places-grid{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:14px;
+            margin-bottom:30px;
+        }
+
+        .place-card{
+            position:relative;
+        }
+
+        .place-card input{
+            display:none;
+        }
+
+        .place-label{
+            display:block;
+            border:1.5px solid #e2e2e2;
+            border-radius:20px;
+            padding:18px 14px;
+            background:white;
+            cursor:pointer;
+            transition:0.3s;
+            min-height:150px;
+            position:relative;
+        }
+
+        .place-card input:checked + .place-label{
+            border-color:#163867;
+            background:#edf4ff;
+        }
+
+        .check-circle{
+            position:absolute;
+            top:12px;
+            right:12px;
+            width:24px;
+            height:24px;
+            border-radius:50%;
+            border:2px solid #d8d8d8;
+            background:white;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:white;
+            font-size:13px;
+            transition:0.3s;
+        }
+
+        .place-card input:checked + .place-label .check-circle{
+            background:#163867;
+            border-color:#163867;
+            color:white;
+        }
+
+        .place-icon{
+            width:52px;
+            height:52px;
+            border-radius:14px;
+            background:#f4f7fb;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:24px;
+        }
+
+        .place-name{
+            margin-top:14px;
+            color:#163867;
+            font-size:17px;
+            font-weight:700;
+        }
+
+        .place-category{
+            color:#8b8b8b;
+            font-size:13px;
+            margin-top:6px;
+        }
+
+        /* BUTTON */
+
+        .submit-btn{
+            width:100%;
+            height:58px;
+            border:none;
+            border-radius:18px;
+            background:#163867;
+            color:white;
+            font-size:17px;
+            font-weight:600;
+            cursor:pointer;
+
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:12px;
+        }
+
+        .loader{
+            width:22px;
+            height:22px;
+            border:3px solid rgba(255,255,255,0.3);
+            border-top:3px solid white;
+            border-radius:50%;
+            animation:spin 0.8s linear infinite;
+            display:none;
+        }
+
+        @keyframes spin{
+            100%{
+                transform:rotate(360deg);
+            }
+        }
+
+        .empty{
+            color:#888;
+            text-align:center;
+            padding:30px 0;
+        }
+
+    </style>
+
+</head>
+
 <body>
 
-  <h2>{{ city.name }}</h2>
+<div class="container">
 
-  <!-- Форма зміни категорій без перезавантаження списку -->
-  <form method="GET" action="{% url 'place_list' %}">
-    <input type="hidden" name="city" value="{{ city.id }}">
-    {% for value, label in all_categories %}
-      <label>
-        <input type="checkbox" name="category" value="{{ value }}"
-          {% if value in selected_categories %}checked{% endif %}>
-        {{ label }}
-      </label>
-    {% endfor %}
-    <button type="submit">Оновити</button>
-  </form>
+    <!-- КРОКИ -->
 
-  <hr>
+    <div class="steps">
 
-  <!-- Форма вибору конкретних місць для маршруту -->
-  <form method="POST" action="{% url 'build_route' %}">
-    {% csrf_token %}
+        <div class="step completed">
+            <div class="circle">✓</div>
+            <p>Локація</p>
+        </div>
 
-    <p>Вибери заклади для маршруту:</p>
+        <div class="step completed" id="step2">
+            <div class="circle" id="step2Circle">✓</div>
+            <p>Місця</p>
+        </div>
 
-    {% for place in places %}
-      <label style="display:flex; gap:10px; margin-bottom:8px;">
-        <input type="checkbox" name="place_ids" value="{{ place.id }}">
-        <span>
-          {% if place.category == 'cafe' %}☕
-          {% elif place.category == 'restaurant' %}🍽
-          {% elif place.category == 'museum' %}🏛
-          {% endif %}
-        </span>
-        <b>{{ place.name }}</b>
-        <small style="color:gray;">{{ place.get_category_display }}</small>
-      </label>
-    {% empty %}
-      <p>Місць не знайдено. Спробуй іншу категорію.</p>
-    {% endfor %}
+        <div class="step active" id="step3">
+            <div class="circle" id="step3Circle">3</div>
+            <p>Маршрут</p>
+        </div>
 
-    <br>
-    <button type="submit">Побудувати маршрут</button>
-  </form>
+    </div>
+
+    <!-- HEADER -->
+
+    <h1 class="city-title">
+        {{ city.name }}
+    </h1>
+
+    <p class="subtitle">
+        Оберіть категорії та місця для маршруту
+    </p>
+
+    <!-- КАТЕГОРІЇ -->
+
+    <form method="GET" action="{% url 'place_list' %}" class="categories-form">
+
+        <input type="hidden" name="city" value="{{ city.id }}">
+
+        <div class="categories-scroll">
+
+            {% for value, label in all_categories %}
+
+            <div class="category-pill">
+
+                <input type="checkbox"
+                       id="{{ value }}"
+                       name="category"
+                       value="{{ value }}"
+                       {% if value in selected_categories %}checked{% endif %}>
+
+                <label for="{{ value }}">
+                    {{ label }}
+                </label>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        <button type="submit" class="update-btn">
+            Оновити категорії
+        </button>
+
+    </form>
+
+    <!-- МІСЦЯ -->
+
+    <form method="POST" action="{% url 'build_route' %}" id="routeForm">
+
+        {% csrf_token %}
+
+        <h2 class="places-title">
+            Виберіть місця
+        </h2>
+
+        <div class="places-grid">
+
+            {% for place in places %}
+
+            <div class="place-card">
+
+                <input type="checkbox"
+                       id="place{{ place.id }}"
+                       name="place_ids"
+                       value="{{ place.id }}">
+
+                <label for="place{{ place.id }}" class="place-label">
+
+                    <div class="check-circle">✓</div>
+
+                    <div class="place-icon">
+
+                        {% if place.category == 'cafe' %}
+                            ☕
+
+                        {% elif place.category == 'restaurant' %}
+                            🍽️
+
+                        {% elif place.category == 'museum' %}
+                            🏛️
+
+                        {% elif place.category == 'bar' %}
+                            🍹
+
+                        {% elif place.category == 'park' %}
+                            🌳
+
+                        {% elif place.category == 'cinema' %}
+                            🎬
+
+                        {% elif place.category == 'fast_food' %}
+                            🍔
+
+                        {% elif place.category == 'bakery' %}
+                            🥐
+
+                        {% elif place.category == 'nightclub' %}
+                            🎵
+
+                        {% elif place.category == 'theatre' %}
+                            🎭
+
+                        {% elif place.category == 'supermarket' %}
+                            🛒
+
+                        {% else %}
+                            📍
+                        {% endif %}
+
+                    </div>
+
+                    <div class="place-name">
+                        {{ place.name }}
+                    </div>
+
+                    <div class="place-category">
+                        {{ place.get_category_display }}
+                    </div>
+                    {% if place.rating %}
+                      <div class="place-rating">
+                          ⭐ {{ place.rating }}
+                      </div>
+                    {% endif %}
+
+                </label>
+
+            </div>
+
+            {% empty %}
+
+            <div class="empty">
+                Місць не знайдено
+            </div>
+
+            {% endfor %}
+
+        </div>
+        <label>
+          <input type="radio" name="visibility" value="private" checked> Особистий
+        </label>
+        <label>
+          <input type="radio" name="visibility" value="public"> Публічний
+        </label>
+
+
+        <!-- BUTTON -->
+
+        <button type="submit" class="submit-btn" id="submitBtn">
+
+            <span id="btnText">
+                Скласти маршрут
+            </span>
+
+            <div class="loader" id="loader"></div>
+
+        </button>
+
+    </form>
+
+</div>
+
+<script>
+
+    const routeForm = document.getElementById("routeForm");
+    const loader = document.getElementById("loader");
+    const btnText = document.getElementById("btnText");
+
+    const step3 = document.getElementById("step3");
+    const step3Circle = document.getElementById("step3Circle");
+
+    routeForm.addEventListener("submit", function(){
+
+        step3.classList.remove("active");
+        step3.classList.add("completed");
+
+        step3Circle.innerHTML = "✓";
+
+        loader.style.display = "block";
+
+        btnText.innerHTML = "Створення маршруту...";
+
+    });
+
+</script>
 
 </body>
 </html>

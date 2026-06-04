@@ -1,45 +1,562 @@
-{% extends "base.html" %}
-{% block content %}
-  <h2>Оберіть місто</h2>
-  <form method="GET" action="{% url 'place_list' %}">
-    <select name="city">
-      {% for city in cities %}
-        <option value="{{ city.id }}">{{ city.name }}</option>
-      {% endfor %}
-    </select>
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Побудувати маршрут</title>
 
-    <p>Оберіть категорії (можна декілька):</p>
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, sans-serif;
+        }
 
-    <label>
-      <input type="checkbox" name="category" value="cafe" checked>
-      Кафе
-    </label><br>
-    <label>
-      <input type="checkbox" name="category" value="restaurant">
-      Ресторани
-    </label><br>
-    <label>
-      <input type="checkbox" name="category" value="museum">
-      Музеї
-    </label><br>
-    <label>
-      <input type="checkbox" name="category" value="bar">
-      Бари
-    </label><br>
-    <label>
-      <input type="checkbox" name="category" value="park">
-      Парки
-    </label><br>
-    <label>
-      <input type="checkbox" name="category" value="landmarks">
-      Пам'ятки
-    </label><br>
-    <label><input type="checkbox" name="category" value="fast_food"> Фастфуд</label><br>
-    <label><input type="checkbox" name="category" value="nightclub"> Нічні клуби</label><br>
-    <label><input type="checkbox" name="category" value="bakery"> Пекарні</label><br>
-    <label><input type="checkbox" name="category" value="supermarket"> Супермаркети</label><br>
-    <label><input type="checkbox" name="category" value="theatre"> Театри</label><br>
-    <label><input type="checkbox" name="category" value="cinema"> Кінотеатри</label><br>
-    <button type="submit">Показати заклади</button>
-  </form>
-{% endblock %}
+        body{
+            background:#f5f5f5;
+            padding:20px;
+        }
+
+        .route-container{
+            max-width:430px;
+            margin:auto;
+            background:#fff;
+            border-radius:30px;
+            padding:25px 18px;
+            box-shadow:0 4px 20px rgba(0,0,0,0.05);
+        }
+
+        .top-title{
+            text-align:center;
+            font-size:28px;
+            font-weight:700;
+            color:#163867;
+            margin-bottom:30px;
+        }
+
+        /* КРОКИ */
+
+        .steps{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:35px;
+            position:relative;
+        }
+
+        .steps::before{
+            content:"";
+            position:absolute;
+            top:18px;
+            left:55px;
+            right:55px;
+            height:2px;
+            background:#e4e4e4;
+            z-index:1;
+        }
+
+        .step{
+            position:relative;
+            z-index:2;
+            text-align:center;
+            flex:1;
+        }
+
+        .circle{
+            width:38px;
+            height:38px;
+            border-radius:50%;
+            background:#e9e9e9;
+            color:#888;
+            margin:0 auto 8px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-weight:700;
+            transition:0.3s;
+        }
+
+        .step.active .circle{
+            background:#163867;
+            color:white;
+        }
+
+        .step.completed .circle{
+            background:#163867;
+            color:white;
+        }
+
+        .step p{
+            font-size:13px;
+            color:#666;
+        }
+
+        /* ТЕКСТ */
+
+        .section-title{
+            font-size:26px;
+            font-weight:700;
+            color:#163867;
+            margin-bottom:6px;
+        }
+
+        .section-subtitle{
+            color:#8a8a8a;
+            font-size:14px;
+            margin-bottom:20px;
+        }
+
+        /* SELECT */
+
+        .city-select{
+            width:100%;
+            height:56px;
+            border:1.5px solid #ddd;
+            border-radius:16px;
+            padding:0 16px;
+            font-size:15px;
+            margin-bottom:25px;
+            outline:none;
+        }
+
+        .city-select:focus{
+            border-color:#163867;
+        }
+
+        /* КАТЕГОРІЇ */
+
+        .categories{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:14px;
+            margin-bottom:30px;
+        }
+
+        .category-card{
+            position:relative;
+        }
+
+        .category-card input{
+            display:none;
+        }
+
+        .category-label{
+            display:block;
+            background:white;
+            border:1.5px solid #e2e2e2;
+            border-radius:18px;
+            padding:18px 14px;
+            cursor:pointer;
+            transition:0.3s;
+            min-height:120px;
+            position:relative;
+        }
+
+        .category-label:hover{
+            transform:translateY(-2px);
+        }
+
+        .checkbox-circle{
+            position:absolute;
+            top:12px;
+            right:12px;
+            width:24px;
+            height:24px;
+            border-radius:50%;
+            border:2px solid #d8d8d8;
+            background:white;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:13px;
+            color:white;
+            transition:0.3s;
+        }
+
+        .category-card input:checked + .category-label{
+            border-color:#163867;
+            background:#edf4ff;
+        }
+
+        .category-card input:checked + .category-label .checkbox-circle{
+            background:#163867;
+            border-color:#163867;
+            color:white;
+        }
+
+        .icon{
+            width:52px;
+            height:52px;
+            border-radius:14px;
+            background:#f4f7fb;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:24px;
+        }
+
+        .category-label h4{
+            color:#163867;
+            margin-top:15px;
+            margin-bottom:6px;
+            font-size:17px;
+        }
+
+        .category-label p{
+            color:#8a8a8a;
+            font-size:13px;
+        }
+
+        /* КНОПКА */
+
+        .submit-btn{
+            width:100%;
+            height:58px;
+            border:none;
+            border-radius:18px;
+            background:#163867;
+            color:white;
+            font-size:17px;
+            font-weight:600;
+            cursor:pointer;
+            transition:0.3s;
+        }
+
+        .submit-btn:hover{
+            background:#102c55;
+        }
+        .submit-btn{
+    width:100%;
+    height:58px;
+    border:none;
+    border-radius:18px;
+    background:#163867;
+    color:white;
+    font-size:17px;
+    font-weight:600;
+    cursor:pointer;
+    transition:0.3s;
+    position:relative;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+}
+
+.submit-btn:hover{
+    background:#102c55;
+}
+
+/* LOADER */
+
+.loader{
+    width:22px;
+    height:22px;
+    border:3px solid rgba(255,255,255,0.35);
+    border-top:3px solid white;
+    border-radius:50%;
+
+    animation:spin 0.8s linear infinite;
+
+    display:none;
+}
+
+@keyframes spin{
+    100%{
+        transform:rotate(360deg);
+    }
+}
+    </style>
+</head>
+
+<body>
+
+<div class="route-container">
+  
+    <div class="top-title">
+        Побудувати маршрут
+    </div>
+
+    <!-- КРОКИ -->
+    <div class="steps">
+
+        <!-- якщо місто вибране -->
+        <div class="step active" id="step1">
+            <div class="circle" id="step1-circle">1</div>
+            <p>Локація</p>
+        </div>
+
+        <div class="step" id="step2">
+            <div class="circle">2</div>
+            <p>Місця</p>
+        </div>
+
+        <div class="step">
+            <div class="circle">3</div>
+            <p>Маршрут</p>
+        </div>
+
+    </div>
+
+    <h2 class="section-title">
+        Оберіть місто
+    </h2>
+
+    <p class="section-subtitle">
+        Можна вибрати кілька категорій
+    </p>
+
+    <form method="GET" action="{% url 'place_list' %}">
+
+        <!-- МІСТО -->
+        <select name="city" class="city-select" id="citySelect">
+
+            <option value="">
+                Оберіть місто
+            </option>
+
+            {% for city in cities %}
+                <option value="{{ city.id }}">
+                    {{ city.name }}
+                </option>
+            {% endfor %}
+
+        </select>
+
+        <!-- КАТЕГОРІЇ -->
+
+        <div class="categories">
+
+            <!-- Кафе -->
+            <div class="category-card">
+                <input type="checkbox" id="cafe" name="category" value="cafe" checked>
+
+                <label for="cafe" class="category-label">
+
+                    <div class="checkbox-circle">✓</div>
+
+                    <div class="icon">☕</div>
+
+                    <h4>Кафе</h4>
+
+                </label>
+            </div>
+
+            <!-- Ресторани -->
+            <div class="category-card">
+                <input type="checkbox" id="restaurant" name="category" value="restaurant">
+
+                <label for="restaurant" class="category-label">
+
+                    <div class="checkbox-circle">✓</div>
+
+                    <div class="icon">🍽️</div>
+
+                    <h4>Ресторани</h4>
+
+                </label>
+            </div>
+
+            <!-- Музеї -->
+            <div class="category-card">
+                <input type="checkbox" id="museum" name="category" value="museum">
+
+                <label for="museum" class="category-label">
+
+                    <div class="checkbox-circle">✓</div>
+
+                    <div class="icon">🏛️</div>
+
+                    <h4>Музеї</h4>
+
+                </label>
+            </div>
+
+            <!-- Бари -->
+            <div class="category-card">
+                <input type="checkbox" id="bar" name="category" value="bar">
+
+                <label for="bar" class="category-label">
+
+                    <div class="checkbox-circle">✓</div>
+
+                    <div class="icon">🍹</div>
+
+                    <h4>Бари</h4>
+
+                </label>
+            </div>
+
+            <!-- Парки -->
+            <div class="category-card">
+                <input type="checkbox" id="park" name="category" value="park">
+
+                <label for="park" class="category-label">
+
+                    <div class="checkbox-circle">✓</div>
+
+                    <div class="icon">🌳</div>
+
+                    <h4>Парки</h4>
+
+                </label>
+            </div>
+
+            <!-- Пам'ятки -->
+            <div class="category-card">
+                <input type="checkbox" id="landmarks" name="category" value="tourist_attraction">
+
+                <label for="landmarks" class="category-label">
+
+                    <div class="checkbox-circle">✓</div>
+
+                    <div class="icon">📍</div>
+
+                    <h4>Пам'ятки</h4>
+
+                </label>
+            </div>
+
+            <!-- Фастфуд -->
+            <div class="category-card">
+                <input type="checkbox" id="fast_food" name="category" value="fast_food">
+
+                <label for="fast_food" class="category-label">
+
+                    <div class="checkbox-circle">✓</div>
+
+                    <div class="icon">🍔</div>
+
+                    <h4>Фастфуд</h4>
+
+                </label>
+            </div>
+
+            <!-- Нічні клуби -->
+            <div class="category-card">
+                <input type="checkbox" id="nightclub" name="category" value="night_club">
+
+                <label for="nightclub" class="category-label">
+
+                    <div class="checkbox-circle">✓</div>
+
+                    <div class="icon">🎵</div>
+
+                    <h4>Нічні клуби</h4>
+
+                </label>
+            </div>
+
+            <!-- Пекарні -->
+            <div class="category-card">
+                <input type="checkbox" id="bakery" name="category" value="bakery">
+
+                <label for="bakery" class="category-label">
+
+                    <div class="checkbox-circle">✓</div>
+
+                    <div class="icon">🥐</div>
+
+                    <h4>Пекарні</h4>
+
+                </label>
+            </div>
+
+            <!-- Супермаркети -->
+            <div class="category-card">
+                <input type="checkbox" id="supermarket" name="category" value="supermarket">
+
+                <label for="supermarket" class="category-label">
+
+                    <div class="checkbox-circle">✓</div>
+
+                    <div class="icon">🛒</div>
+
+                    <h4>Супермаркети</h4>
+
+                </label>
+            </div>
+
+            <!-- Театри -->
+            <div class="category-card">
+                <input type="checkbox" id="theatre" name="category" value="movie_theater">
+
+                <label for="theatre" class="category-label">
+
+                    <div class="checkbox-circle">✓</div>
+
+                    <div class="icon">🎭</div>
+
+                    <h4>Театри/Кінотеатри</h4>
+
+                </label>
+            </div>
+
+
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">
+          <span id="btnText">Показати заклади</span>
+
+          <!-- loader -->
+          <div class="loader" id="loader"></div>
+        </button>
+
+    </form>
+
+</div>
+
+<script>
+
+    const citySelect = document.getElementById("citySelect");
+    const step1 = document.getElementById("step1");
+    const step2 = document.getElementById("step2");
+    const step1Circle = document.getElementById("step1-circle");
+
+    const form = document.querySelector("form");
+    const submitBtn = document.getElementById("submitBtn");
+    const loader = document.getElementById("loader");
+    const btnText = document.getElementById("btnText");
+
+    form.addEventListener("submit", function(){
+
+        loader.style.display = "block";
+
+        btnText.innerHTML = "Завантаження...";
+
+        submitBtn.disabled = true;
+
+        submitBtn.style.opacity = "0.85";
+
+    });
+
+    citySelect.addEventListener("change", function(){
+
+        if(citySelect.value !== ""){
+
+            step1.classList.remove("active");
+            step1.classList.add("completed");
+
+            step1Circle.innerHTML = "✓";
+
+            step2.classList.add("active");
+
+        }else{
+
+            step1.classList.add("active");
+            step1.classList.remove("completed");
+
+            step1Circle.innerHTML = "1";
+
+            step2.classList.remove("active");
+
+        }
+
+    });
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Архів маршрутів</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+  <style>
+    .map { height: 400px; width: 100%; margin-bottom: 20px; }
+    .info { padding: 5px; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <h2>Архів завершених маршрутів</h2>
+
+  {% if routes_qs %}
+  <ul>
+    {% for route in routes_qs %}
+      <li>
+        <strong>Маршрут №{{ forloop.counter }}</strong>
+        (створено {{ route.created_at|date:"d.m.Y H:i" }})
+        <ul>
+          {% for place in route.places.all %}
+            <li>{{ place.name }} — {{ place.get_category_display }} ({{ place.address }})</li>
+          {% endfor %}
+        </ul>
+        <div id="info-{{ route.id }}" class="info">Маршрут завершений</div>
+        <div id="map-{{ route.id }}" class="map"></div>
+      </li>
+    {% endfor %}
+  </ul>
+
+    <!-- тут вже routes — список словників -->
+    {{ routes|json_script:"routes-data" }}
+    {% else %}
+    <p>У вас ще немає завершених маршрутів.</p>
+    {% endif %}
+
+
+  <a href="{% url 'user_routes' %}">← Повернутися до моїх маршрутів</a>
+</body>
+</html>
