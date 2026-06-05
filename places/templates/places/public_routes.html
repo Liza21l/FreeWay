@@ -104,6 +104,59 @@ body{
     border-radius:20px;
     font-size:12px;
 }
+.route-user{
+    margin-top:8px;
+    color:#777;
+    font-size:14px;
+}
+
+.route-actions{
+    display:flex;
+    gap:10px;
+    margin-top:16px;
+}
+
+.expand-btn{
+    width:44px;
+    height:44px;
+
+    border:none;
+    border-radius:14px;
+
+    background:#edf4ff;
+    color:#163867;
+
+    cursor:pointer;
+
+    font-size:18px;
+    font-weight:bold;
+
+    transition:.2s;
+}
+
+.expand-btn:hover{
+    transform:scale(1.05);
+}
+
+.route-details{
+    max-height:0;
+    overflow:hidden;
+
+    transition:
+        max-height .35s ease,
+        margin-top .35s ease;
+}
+
+.route-details.open{
+    max-height:1500px;
+    margin-top:15px;
+}
+
+.route-divider{
+    height:1px;
+    background:#e8e8e8;
+    margin-bottom:15px;
+}
 
 .places-title{
     color:#999;
@@ -132,7 +185,6 @@ body{
 }
 
 .share-btn{
-    margin-top:15px;
     display:inline-flex;
     align-items:center;
     gap:8px;
@@ -179,7 +231,7 @@ body{
 
     <div class="header">
 
-        <a href="{% url 'user_routes' %}" class="back-btn">
+        <a href="{% url 'home' %}" class="back-btn">
             ←
         </a>
 
@@ -201,8 +253,21 @@ body{
 
                 <div class="route-top">
 
-                    <div class="route-title">
-                        Маршрут №{{ forloop.counter }}
+                    <div>
+
+                        <div class="route-title">
+                            Маршрут №{{ forloop.counter }}
+                        </div>
+
+                        <div class="route-user">
+                            👤
+                            {% if route.user.first_name %}
+                                {{ route.user.first_name }}
+                            {% else %}
+                                {{ route.user.username }}
+                            {% endif %}
+                        </div>
+
                     </div>
 
                     <div class="route-date">
@@ -211,39 +276,60 @@ body{
 
                 </div>
 
-                <div class="places-title">
-                    ТОЧКИ МАРШРУТУ
+                <div class="route-actions">
+
+                    {% if route.share_uuid %}
+
+                    <a
+                        href="{% url 'shared_route' route.share_uuid %}"
+                        class="share-btn"
+                        onclick="
+                            event.stopPropagation();
+                            navigator.clipboard.writeText(this.href);
+                            alert('Посилання скопійовано!');
+                        "
+                    >
+                        🔗 Поділитися
+                    </a>
+
+                    {% endif %}
+
+                    <button
+                        class="expand-btn"
+                        onclick="toggleRoute(this)"
+                    >
+                        ▼
+                    </button>
+
                 </div>
 
-                {% for place in route.places.all %}
+                <div class="route-details">
 
-                <div class="place-tag">
+                    <div class="route-divider"></div>
 
-                    <div class="place-name">
-                        {{ place.name }}
+                    <div class="places-title">
+                        ТОЧКИ МАРШРУТУ
                     </div>
 
-                    <div class="place-info">
-                        {{ place.get_category_display }}
-                        •
-                        {{ place.address }}
+                    {% for place in route.places.all %}
+
+                    <div class="place-tag">
+
+                        <div class="place-name">
+                            {{ place.name }}
+                        </div>
+
+                        <div class="place-info">
+                            {{ place.get_category_display }}
+                            •
+                            {{ place.address }}
+                        </div>
+
                     </div>
+
+                    {% endfor %}
 
                 </div>
-
-                {% endfor %}
-
-                {% if route.share_uuid %}
-
-                <a
-                    href="{% url 'shared_route' route.share_uuid %}"
-                    class="share-btn"
-                    onclick="navigator.clipboard.writeText(this.href); alert('Посилання скопійовано!')"
-                >
-                    🔗 Поділитися
-                </a>
-
-                {% endif %}
 
             </div>
 
@@ -272,6 +358,22 @@ body{
     </div>
 
 </div>
+<script>
 
+function toggleRoute(button){
+
+    const details =
+        button.closest('.route-card')
+              .querySelector('.route-details');
+
+    details.classList.toggle('open');
+
+    button.innerHTML =
+        details.classList.contains('open')
+        ? '▲'
+        : '▼';
+}
+
+</script>
 </body>
 </html>

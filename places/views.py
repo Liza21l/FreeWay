@@ -12,6 +12,7 @@ from django.contrib.auth.views import LoginView
 from .form import CustomUserCreationForm
 from django.db.models import Sum, Count
 from django.contrib.auth import get_user_model
+from geopy.distance import geodesic
 
 
 def choose_route(request):
@@ -238,9 +239,8 @@ def user_routes_view(request):
     Показує всі маршрути, створені користувачем.
     """
     routes_qs = UserRoute.objects.filter(user=request.user).prefetch_related('places')
-    private_routes = routes_qs.filter(visibility='private')
-    public_routes  = routes_qs.filter(visibility='public')
-    
+    private_routes = routes_qs.filter(visibility='private', status='active')
+    public_routes  = routes_qs.filter(visibility='public', status='active')
 
     # перетворюємо QuerySet у список словників для JSON
     routes = []
@@ -299,10 +299,6 @@ def place_list(request):
 
 @login_required
 def build_route(request):
-    """
-    Крок 3 — отримує вибрані місця і будує маршрут.
-    Порядок точок = порядок в якому користувач ставив галочки.
-    """
     if request.method != 'POST':
         return redirect('home')
 
@@ -314,11 +310,9 @@ def build_route(request):
 
     places = Place.objects.filter(id__in=selected_ids)
 
-    # Зберігаємо маршрут в БД
     route = UserRoute.objects.create(user=request.user, visibility=visibility)
     route.places.set(places)
 
-    # Координати в порядку вибору користувача
     coords = []
     for pid in selected_ids:
         try:
@@ -331,5 +325,14 @@ def build_route(request):
             })
         except Place.DoesNotExist:
             continue
+
+    total_km = 0
+    for i in range(len(coords)-1):
+        p1 = (coords[i]['lat'], coords[i]['lon'])
+        p2 = (coords[i+1]['lat'], coords[i+1]['lon'])
+        total_km += geodesic(p1, p2).km
+
+    route.distance_km = round(total_km, 2)
+    route.save()
 
     return render(request, 'places/map.html', {'coords': coords})
