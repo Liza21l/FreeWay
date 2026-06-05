@@ -38,6 +38,7 @@ class Place(models.Model):
     lat      = models.FloatField()
     lon      = models.FloatField()
     rating   = models.FloatField(blank=True, null=True) 
+    is_open  = models.BooleanField(default=False, null=True)
     address  = models.CharField(max_length=300, blank=True)
 
     def __str__(self):
@@ -61,6 +62,9 @@ class UserRoute(models.Model):
     distance_km = models.FloatField(default=0)
     share_uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     friends = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="friend_routes", blank=True)
+    has_start_location = models.BooleanField(default=False)
+    start_lat = models.FloatField(null=True, blank=True)
+    start_lon = models.FloatField(null=True, blank=True)
 
     def __str__(self):
         return f"Маршрут {self.id} ({self.get_status_display()}, {self.get_visibility_display()})"

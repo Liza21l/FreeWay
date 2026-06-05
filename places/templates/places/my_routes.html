@@ -1,116 +1,635 @@
 <!DOCTYPE html>
-<html>
+<html lang="uk">
 <head>
-  <title>Мої маршрути</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
-  <style>
-    .map { height: 400px; width: 100%; margin-bottom: 20px; }
-    .info { padding: 5px; font-size: 14px; }
-    .place-checkbox { margin-right: 6px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Мої маршрути</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"/>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Inter, Arial, sans-serif;
+}
+
+body{
+    background:#f5f5f5;
+}
+
+.container{
+    width:100%;
+    max-width:430px;
+    margin:auto;
+    min-height:100vh;
+    background:#f7f5f2;
+}
+
+.header{
+    background:#163867;
+    color:white;
+    padding:70px 24px 24px;
+    border-bottom-left-radius:30px;
+    border-bottom-right-radius:30px;
+    position:relative;
+}
+
+.back-btn{
+    position:absolute;
+    left:20px;
+    top:20px;
+
+    width:42px;
+    height:42px;
+
+    border-radius:12px;
+
+    background:rgba(255,255,255,.12);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    color:white;
+    text-decoration:none;
+    font-size:20px;
+}
+
+.header h1{
+    font-size:34px;
+    font-weight:800;
+    margin-bottom:10px;
+}
+
+.header p{
+    color:rgba(255,255,255,.75);
+}
+
+.tabs{
+    display:flex;
+    gap:10px;
+    padding:20px;
+}
+
+.tab-btn{
+    flex:1;
+    height:50px;
+    border:none;
+    border-radius:14px;
+    cursor:pointer;
+
+    background:#ececec;
+
+    font-weight:700;
+    font-size:15px;
+}
+
+.tab-btn.active{
+    background:#163867;
+    color:white;
+}
+
+.archive-btn{
+    display:block;
+
+    margin:0 20px 20px;
+
+    background:#edf4ff;
+    color:#163867;
+
+    text-decoration:none;
+    text-align:center;
+
+    padding:16px;
+
+    border-radius:18px;
+
+    font-weight:700;
+}
+
+.routes-wrapper{
+    padding:0 20px 20px;
+}
+
+.route-card{
+    background:white;
+    border-radius:24px;
+    padding:20px;
+    margin-bottom:16px;
+
+    box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
+
+.route-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.route-title{
+    font-size:22px;
+    font-weight:800;
+    color:#163867;
+}
+
+.route-date{
+    color:#888;
+    margin-top:6px;
+    font-size:14px;
+}
+
+.details-btn{
+    border:none;
+    background:#163867;
+    color:white;
+
+    padding:12px 16px;
+
+    border-radius:12px;
+
+    cursor:pointer;
+}
+
+.route-details{
+    display:none;
+    margin-top:20px;
+}
+
+.route-info{
+    margin-bottom:15px;
+    color:#163867;
+    font-weight:700;
+}
+
+.map{
+    height:260px;
+    border-radius:18px;
+    overflow:hidden;
+    margin-bottom:15px;
+}
+
+.place-item{
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+
+    background:#f3f1eb;
+
+    border-radius:14px;
+
+    padding:12px;
+
+    margin-bottom:10px;
+}
+
+.place-checkbox{
+    width:18px;
+    height:18px;
+    margin-top:3px;
+}
+
+.place-name{
+    font-weight:700;
+    color:#163867;
+}
+
+.place-address{
+    color:#777;
+    font-size:14px;
+    margin-top:3px;
+}
+
+.finish-btn{
+    width:100%;
+    height:54px;
+
+    border:none;
+
+    border-radius:16px;
+
+    background:#163867;
+    color:white;
+
+    font-size:15px;
+    font-weight:700;
+
+    cursor:pointer;
+}
+
+.empty{
+    background:white;
+    border-radius:24px;
+    padding:25px;
+    text-align:center;
+    color:#888;
+}
+
+.leaflet-routing-container,
+.leaflet-routing-itinerary{
+    display:none !important;
+}
+
+</style>
 </head>
+
 <body>
-  <h2>Мої маршрути</h2>
 
-  <a href="{% url 'archived_routes' %}">→ Архів завершених</a>
+<div class="container">
 
-  <h3>Особисті маршрути</h3>
-  {% if private_routes %}
-    <ul>
-      {% for route in private_routes %}
-        <li>
-          <strong>Маршрут №{{ forloop.counter }}</strong>
-          (створено {{ route.created_at|date:"d.m.Y H:i" }})
-          <ul>
+<div class="header">
+
+    <a href="{% url 'home' %}" class="back-btn">
+        ←
+    </a>
+
+    <h1>Мої маршрути</h1>
+
+    <p>
+        Керуйте своїми маршрутами
+    </p>
+
+</div>
+
+<div class="tabs">
+
+    <button
+        class="tab-btn active"
+        onclick="showTab('private', this)">
+        Особисті
+    </button>
+
+    <button
+        class="tab-btn"
+        onclick="showTab('public', this)">
+        Публічні
+    </button>
+
+</div>
+
+<a href="{% url 'archived_routes' %}"
+   class="archive-btn">
+   🗂 Архів маршрутів
+</a>
+
+<!-- ОСОБИСТІ -->
+
+<div id="privateRoutes">
+
+{% if private_routes %}
+
+    {% for route in private_routes %}
+
+    <div class="route-card">
+
+        <div class="route-header">
+
+            <div>
+
+                <div class="route-title">
+                    Маршрут №{{ forloop.counter }}
+                </div>
+
+                <div class="route-date">
+                    {{ route.created_at|date:"d.m.Y H:i" }}
+                </div>
+
+            </div>
+
+            <button
+                class="details-btn"
+                onclick="toggleRoute('{{ route.id }}')">
+                Деталі
+            </button>
+
+        </div>
+
+        <div
+            class="route-details"
+            id="route-{{ route.id }}">
+
+            <div
+                id="info-{{ route.id }}"
+                class="route-info">
+                Будуємо маршрут...
+            </div>
+
+            <div
+                id="map-{{ route.id }}"
+                class="map">
+            </div>
+
             {% for place in route.places.all %}
-              <li>
-                <input type="checkbox"
-                       class="place-checkbox"
-                       data-route="{{ route.id }}"
-                       data-place="{{ place.id }}">
-                {{ place.name }} — {{ place.category }} ({{ place.address }})
-              </li>
-            {% endfor %}
-          </ul>
-          <form method="post" action="{% url 'toggle_route_status' route.id %}">
-            {% csrf_token %}
-              <button type="submit">Завершити</button>
-          </form>
-          <div id="info-{{ route.id }}" class="info">Будуємо маршрут...</div>
-          <div id="map-{{ route.id }}" class="map"></div>
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p>Немає особистих маршрутів.</p>
-  {% endif %}
 
-  <h3>Публічні маршрути (ваші)</h3>
-  {% if public_routes %}
-    <ul>
-      {% for route in public_routes %}
-        <li>
-          <strong>Маршрут №{{ forloop.counter }}</strong>
-          (створено {{ route.created_at|date:"d.m.Y H:i" }})
-          <ul>
+            <label class="place-item">
+
+                <input
+                    type="checkbox"
+                    class="place-checkbox"
+                    data-route="{{ route.id }}"
+                    data-place="{{ place.id }}">
+
+                <div>
+
+                    <div class="place-name">
+                        {{ place.name }}
+                    </div>
+
+                    <div class="place-address">
+                        {{ place.address }}
+                    </div>
+
+                </div>
+
+            </label>
+
+            {% endfor %}
+
+            <form
+                method="post"
+                action="{% url 'toggle_route_status' route.id %}">
+
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    class="finish-btn">
+                    ✓ Завершити маршрут
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    {% endfor %}
+
+{% else %}
+
+<div class="empty">
+    Немає особистих маршрутів
+</div>
+
+{% endif %}
+
+</div>
+
+<!-- ПУБЛІЧНІ -->
+
+<div
+    id="publicRoutes"
+    style="display:none;">
+
+{% if public_routes %}
+
+    {% for route in public_routes %}
+
+    <div class="route-card">
+
+        <div class="route-header">
+
+            <div>
+
+                <div class="route-title">
+                    Маршрут №{{ forloop.counter }}
+                </div>
+
+                <div class="route-date">
+                    {{ route.created_at|date:"d.m.Y H:i" }}
+                </div>
+
+            </div>
+
+            <button
+                class="details-btn"
+                onclick="toggleRoute('{{ route.id }}')">
+                Деталі
+            </button>
+
+        </div>
+
+        <div
+            class="route-details"
+            id="route-{{ route.id }}">
+
+            <div
+                id="info-{{ route.id }}"
+                class="route-info">
+                Будуємо маршрут...
+            </div>
+
+            <div
+                id="map-{{ route.id }}"
+                class="map">
+            </div>
+
             {% for place in route.places.all %}
-              <li>
-                <input type="checkbox"
-                       class="place-checkbox"
-                       data-route="{{ route.id }}"
-                       data-place="{{ place.id }}">
-                {{ place.name }} — {{ place.category }} ({{ place.address }})
-              </li>
+
+            <label class="place-item">
+
+                <input
+                    type="checkbox"
+                    class="place-checkbox"
+                    data-route="{{ route.id }}"
+                    data-place="{{ place.id }}">
+
+                <div>
+
+                    <div class="place-name">
+                        {{ place.name }}
+                    </div>
+
+                    <div class="place-address">
+                        {{ place.address }}
+                    </div>
+
+                </div>
+
+            </label>
+
             {% endfor %}
-          </ul>
-          <form method="post" action="{% url 'toggle_route_status' route.id %}">
-            {% csrf_token %}
-              <button type="submit">Завершити</button>
-          </form>
-          <div id="info-{{ route.id }}" class="info">Будуємо маршрут...</div>
-          <div id="map-{{ route.id }}" class="map"></div>
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p>Немає публічних маршрутів.</p>
-  {% endif %}
 
-  <!-- один json_script для всіх маршрутів -->
-  {{ routes|json_script:"routes-data" }}
+            <form
+                method="post"
+                action="{% url 'toggle_route_status' route.id %}">
 
-  <a href="{% url 'home' %}">← Повернутися на головну</a>
+                {% csrf_token %}
 
-  <script>
-    const routes = JSON.parse(document.getElementById("routes-data").textContent);
-    routes.forEach(route => {
-      if (route.coords.length > 0) {
-        const map = L.map(`map-${route.id}`).setView([route.coords[0].lat, route.coords[0].lon], 14);
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OpenStreetMap" }).addTo(map);
-        route.coords.forEach((place, i) => {
-          L.marker([place.lat, place.lon]).bindPopup(`<b>${i+1}. ${place.name}</b>`).addTo(map);
+                <button
+                    type="submit"
+                    class="finish-btn">
+                    ✓ Завершити маршрут
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    {% endfor %}
+
+{% else %}
+
+<div class="empty">
+    Немає публічних маршрутів
+</div>
+
+{% endif %}
+
+</div>
+
+</div>
+
+{{ routes|json_script:"routes-data" }}
+
+<script>
+function showTab(type, button){
+    document.getElementById("privateRoutes").style.display =
+        type === "private" ? "block" : "none";
+
+    document.getElementById("publicRoutes").style.display =
+        type === "public" ? "block" : "none";
+
+    document.querySelectorAll(".tab-btn")
+        .forEach(btn => btn.classList.remove("active"));
+
+    button.classList.add("active");
+}
+
+function toggleRoute(routeId){
+    const block = document.getElementById(`route-${routeId}`);
+    if(block.style.display === "block"){
+        block.style.display = "none";
+    }else{
+        block.style.display = "block";
+        setTimeout(() => {
+            const mapElement = document.getElementById(`map-${routeId}`);
+            if(mapElement._leaflet_map){
+                mapElement._leaflet_map.invalidateSize();
+                if(mapElement._markersBounds){
+                    mapElement._leaflet_map.fitBounds(
+                        mapElement._markersBounds,
+                        { padding:[30,30], maxZoom:16 }
+                    );
+                }
+            }
+        }, 300);
+    }
+}
+
+const routes = JSON.parse(document.getElementById("routes-data").textContent);
+
+routes.forEach(route => {
+    if(route.coords.length === 0) return;
+
+    const mapElement = document.getElementById(`map-${route.id}`);
+    if(!mapElement) return;
+
+    const map = L.map(`map-${route.id}`);
+    mapElement._leaflet_map = map;
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution:"© OpenStreetMap"
+    }).addTo(map);
+
+    const markers = [];
+
+    if (route.has_start_location) {
+        // перша точка — геолокація користувача
+        const start = route.coords[0];
+        const userIcon = L.divIcon({
+            html: `<div style="
+                background:red; border-radius:50%;
+                width:20px; height:20px;
+                border:2px solid white;
+            ">🚶</div>`,
+            iconSize:[20,20],
+            iconAnchor:[10,10]
         });
-        if (route.coords.length > 1) {
-          const control = L.Routing.control({
+
+        const userMarker = L.marker([start.lat, start.lon], {icon: userIcon})
+            .bindPopup("Ви тут")
+            .addTo(map);
+        markers.push(userMarker);
+
+        // решта точок стандартні
+        route.coords.slice(1).forEach((place, index) => {
+            const icon = L.divIcon({
+                html: `<div style="
+                    width:30px; height:30px; border-radius:50%;
+                    background:#163867; color:white;
+                    display:flex; align-items:center; justify-content:center;
+                    font-weight:700; border:2px solid white;
+                ">${index+1}</div>`,
+                iconSize:[30,30],
+                iconAnchor:[15,15]
+            });
+
+            const marker = L.marker([place.lat, place.lon], {icon})
+                .bindPopup(`<b>${place.name}</b>`)
+                .addTo(map);
+            markers.push(marker);
+        });
+    } else {
+        // якщо геолокації немає → всі точки стандартні
+        route.coords.forEach((place, index) => {
+            const icon = L.divIcon({
+                html: `<div style="
+                    width:30px; height:30px; border-radius:50%;
+                    background:#163867; color:white;
+                    display:flex; align-items:center; justify-content:center;
+                    font-weight:700; border:2px solid white;
+                ">${index+1}</div>`,
+                iconSize:[30,30],
+                iconAnchor:[15,15]
+            });
+
+            const marker = L.marker([place.lat, place.lon], {icon})
+                .bindPopup(`<b>${place.name}</b>`)
+                .addTo(map);
+            markers.push(marker);
+        });
+    }
+
+    const group = L.featureGroup(markers);
+    mapElement._markersBounds = group.getBounds();
+
+    if(route.coords.length === 1){
+        map.setView([route.coords[0].lat, route.coords[0].lon], 16);
+    }else{
+        map.fitBounds(group.getBounds(), { padding:[30,30], maxZoom:16 });
+    }
+
+    if(route.coords.length > 1){
+        const control = L.Routing.control({
             waypoints: route.coords.map(p => L.latLng(p.lat, p.lon)),
-            router: L.Routing.osrmv1({ serviceUrl: "https://router.project-osrm.org/route/v1", profile: "foot" }),
-            lineOptions: { styles: [{ color: "#4A90E2", weight: 5, opacity: 0.85 }] },
-            createMarker: () => null,
-            show: false,
-          }).addTo(map);
-          control.on("routesfound", (e) => {
+            router: L.Routing.osrmv1({
+                serviceUrl:"https://router.project-osrm.org/route/v1",
+                profile:"foot"
+            }),
+            lineOptions:{ styles:[{ color:"#4A90E2", weight:5, opacity:.85 }] },
+            createMarker:() => null,
+            show:false
+        }).addTo(map);
+
+        control.on("routesfound", e => {
             const r = e.routes[0];
             const km = (r.summary.totalDistance / 1000).toFixed(2);
             const min = Math.round(r.summary.totalTime / 60);
             document.getElementById(`info-${route.id}`).innerHTML =
-              `Маршрут: <b>${km} км</b> | Час пішки: <b>~${min} хв</b>`;
-          });
-        }
-      }
-    });
-  </script>
+                `📍 ${km} км • 🚶 ~${min} хв`;
+        });
+    }
+});
+</script>
 </body>
 </html>

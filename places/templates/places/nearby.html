@@ -6,6 +6,12 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+  <style>
+    .leaflet-routing-container, 
+    .leaflet-routing-itinerary {
+      display: none !important;
+    }
+  </style>
 </head>
 <body>
   <h1>Побудова маршруту</h1>
@@ -29,7 +35,7 @@
   <div id="map" style="height:500px; margin-top:20px;"></div>
   <div id="info"></div>
 
-  <script>
+<script>
     let userLat, userLon;
 
     // 1. Запит геолокації
@@ -68,7 +74,23 @@
         }).addTo(map);
 
         // Маркер старту (користувач)
-        L.marker([userLat, userLon]).bindPopup("Ви тут").addTo(map);
+        const userIcon = L.divIcon({
+          html: `<div style="
+            background:#E84A4A; color:#fff; border-radius:50%;
+            width:30px; height:30px; display:flex;
+            align-items:center; justify-content:center;
+            font-weight:bold; font-size:14px;
+            border:2px solid #fff; box-shadow:0 2px 5px rgba(0,0,0,.3);
+          ">🚶</div>`,
+          iconSize: [30, 30],
+          iconAnchor: [15, 15],
+          popupAnchor: [0, -18]
+        });
+
+        L.marker([userLat, userLon], { icon: userIcon })
+          .bindPopup("Ви тут")
+          .addTo(map);
+
 
         // Маркери закладів
         places.forEach((p, i) => {
@@ -85,11 +107,19 @@
           router: L.Routing.osrmv1({ serviceUrl: "https://router.project-osrm.org/route/v1", profile: "foot" }),
           lineOptions: { styles: [{ color: "#4A90E2", weight: 5, opacity: 0.85 }] },
           createMarker: () => null,
-          show: false,
-          container: null
+          
+          // --- ДОДАЙТЕ АБО ЗМІНІТЬ ЦІ ПАРАМЕТРИ ---
+          show: false,                 // Ховає саму панель
+          addWaypoints: false,         // Вимикає можливість додавати точки кліком
+          draggableWaypoints: false,   // Вимикає перетягування точок маршруту
+          fitSelectedRoutes: true,     // Автоматично масштабує карту під маршрут
+          
+          // Головне рішення: ховаємо альтернативні маршрути та текстовий контейнер
+          showAlternatives: false,
+          altLineOptions: { styles: [] } 
         }).addTo(map);
       });
     });
-  </script>
+</script>
 </body>
 </html>

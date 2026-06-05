@@ -437,6 +437,11 @@
                           ⭐ {{ place.rating }}
                       </div>
                     {% endif %}
+                    {% if place.is_open %}
+                    <span style="color:green">Відкрито</span>
+                    {% else %}
+                    <span style="color:red">Закрито</span>
+                    {% endif %}
 
                 </label>
 

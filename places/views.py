@@ -1,4 +1,5 @@
 import math, json
+from urllib import request
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
@@ -7,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import City, Place, UserRoute
 from django.http import JsonResponse, HttpResponse
-from .services import fetch_places, GOOGLE_CATEGORIES
+from .services import fetch_places, GOOGLE_CATEGORIES, fetch_places_nearby
 from django.contrib.auth.views import LoginView
 from .form import CustomUserCreationForm
 from django.db.models import Sum, Count
@@ -34,23 +35,46 @@ def nearby_places(request):
         lat, lon = data["lat"], data["lon"]
         categories = data.get("categories", [])
 
+        all_places = fetch_places_nearby(lat, lon, categories)
         result = []
+
+        # групуємо по категоріях
         for cat in categories:
-            qs = Place.objects.filter(category=cat)
-            if qs.exists():
-                nearest = min(qs, key=lambda p: haversine(lat, lon, p.lat, p.lon))
-                result.append({
-                    "name": nearest.name,
-                    "lat": nearest.lat,
-                    "lon": nearest.lon,
-                    "category": nearest.category,
-                    "address": nearest.address,
-                })
+            cat_places = [p for p in all_places if p["category"] == cat]
+
+            # сортуємо по відстані від користувача
+            cat_places_sorted = sorted(
+                cat_places,
+                key=lambda p: haversine(lat, lon, p["lat"], p["lon"])
+            )
+
+            # якщо музей або пам’ятка → беремо 2, інакше 1
+            limit = 2 if cat in ["museum", "tourist_attraction"] else 1
+            result.extend(cat_places_sorted[:limit])
+
+        # зберігаємо маршрут у БД
+        route = UserRoute.objects.create(user=request.user, visibility="private", has_start_location=True, start_lat=lat, start_lon=lon)
+        for p in result:
+            nearest_city = min(City.objects.all(), key=lambda c: haversine(lat, lon, c.lat, c.lon))
+            place_obj, _ = Place.objects.get_or_create(
+                city=nearest_city,
+                name=p["name"],
+                lat=p["lat"],
+                lon=p["lon"],
+                category=p["category"],
+                defaults={
+                    "address": p["address"],
+                    "rating": p.get("rating"),
+                    "is_open": p.get("is_open"),
+                }
+            )
+            route.places.add(place_obj)
 
         return JsonResponse({"places": result})
 
-    # Якщо GET — рендеримо HTML з формою і JS
     return render(request, "places/nearby.html")
+
+
 
 @login_required
 def shared_route_view(request, share_uuid):
@@ -112,10 +136,20 @@ def home_view(request):
             for p in latest_route.places.all()
         ]
 
+        # якщо маршрут має стартову геолокацію → додаємо її як першу точку
+        if latest_route.has_start_location and latest_route.start_lat and latest_route.start_lon:
+            coords.insert(0, {
+                "lat": latest_route.start_lat,
+                "lon": latest_route.start_lon,
+                "name": "Ви тут",
+                "category": "start"
+            })
+
     return render(request, "places/home.html", {
         "latest_route": latest_route,
         "coords": coords,
     })
+
 @login_required
 def archived_routes_view(request):
     """
@@ -242,23 +276,36 @@ def user_routes_view(request):
     private_routes = routes_qs.filter(visibility='private', status='active')
     public_routes  = routes_qs.filter(visibility='public', status='active')
 
-    # перетворюємо QuerySet у список словників для JSON
     routes = []
     for r in routes_qs:
+        coords = [
+            {"lat": p.lat, "lon": p.lon, "name": p.name, "category": p.category}
+            for p in r.places.all()
+        ]
+
+        if r.has_start_location and r.start_lat and r.start_lon:
+            coords.insert(0, {
+                "lat": r.start_lat,
+                "lon": r.start_lon,
+                "name": "Ви тут",
+                "category": "start"
+            })
+
         routes.append({
             "id": r.id,
             "created_at": r.created_at.strftime("%Y-%m-%d %H:%M"),
-            "coords": [
-                {"lat": p.lat, "lon": p.lon, "name": p.name, "category": p.category}
-                for p in r.places.all()
-            ]
+            "coords": coords,
+            "has_start_location": r.has_start_location
         })
+
 
     return render(request, "places/my_routes.html", {
         "routes": routes,
         "private_routes": private_routes,
         "public_routes": public_routes  
     })
+
+
 @login_required
 def select(request):
     cities = City.objects.all()
@@ -310,7 +357,7 @@ def build_route(request):
 
     places = Place.objects.filter(id__in=selected_ids)
 
-    route = UserRoute.objects.create(user=request.user, visibility=visibility)
+    route = UserRoute.objects.create(user=request.user, visibility=visibility, has_start_location=False)
     route.places.set(places)
 
     coords = []

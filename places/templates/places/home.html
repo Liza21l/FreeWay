@@ -10,6 +10,10 @@
     <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
 
     <style>
+        .leaflet-routing-container, 
+        .leaflet-routing-itinerary {
+            display: none !important;
+        }
 
         *{
             margin:0;
@@ -766,7 +770,6 @@
 {{ coords|json_script:"coords-data" }}
 
 <script>
-
     const coords = JSON.parse(
         document.getElementById('coords-data').textContent
     );
@@ -778,9 +781,7 @@
 
     L.tileLayer(
         'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-        {
-            attribution:'© OpenStreetMap'
-        }
+        { attribution:'© OpenStreetMap' }
     ).addTo(map);
 
     const COLORS = {
@@ -789,95 +790,86 @@
         museum:'#4A90E2'
     };
 
-    coords.forEach((place, i) => {
+    // якщо є геолокація користувача → малюємо її окремо
+    if (coords.length > 0 && coords[0].category === "start") {
+        const start = coords[0];
+        const userIcon = L.divIcon({
+            html: `<div style="
+                background:red; border-radius:50%;
+                width:20px; height:20px;
+                border:2px solid white;
+            "></div>`,
+            iconSize:[20,20],
+            iconAnchor:[10,10]
+        });
 
-        const color = COLORS[place.category] || '#163867';
+        L.marker([start.lat, start.lon], { icon: userIcon })
+          .bindPopup("Ви тут")
+          .addTo(map);
 
-        const icon = L.divIcon({
-
-            html: `
-                <div style="
+        // решта точок малюємо стандартними іконками
+        coords.slice(1).forEach((place, i) => {
+            const color = COLORS[place.category] || '#163867';
+            const icon = L.divIcon({
+                html: `<div style="
                     background:${color};
                     color:#fff;
                     border-radius:50%;
-                    width:30px;
-                    height:30px;
-                    display:flex;
-                    align-items:center;
-                    justify-content:center;
-                    font-weight:bold;
-                    border:2px solid white;
-                ">
-                    ${i + 1}
-                </div>
-            `,
-
-            iconSize:[30,30],
-            iconAnchor:[15,15]
-
+                    width:30px; height:30px;
+                    display:flex; align-items:center; justify-content:center;
+                    font-weight:bold; border:2px solid white;
+                ">${i+1}🚶</div>`,
+                iconSize:[30,30],
+                iconAnchor:[15,15]
+            });
+            L.marker([place.lat, place.lon], { icon }).addTo(map);
         });
-
-        L.marker(
-            [place.lat, place.lon],
-            { icon }
-        ).addTo(map);
-
-    });
+    } else {
+        // якщо геолокації немає → всі точки стандартні
+        coords.forEach((place, i) => {
+            const color = COLORS[place.category] || '#163867';
+            const icon = L.divIcon({
+                html: `<div style="
+                    background:${color};
+                    color:#fff;
+                    border-radius:50%;
+                    width:30px; height:30px;
+                    display:flex; align-items:center; justify-content:center;
+                    font-weight:bold; border:2px solid white;
+                ">${i+1}</div>`,
+                iconSize:[30,30],
+                iconAnchor:[15,15]
+            });
+            L.marker([place.lat, place.lon], { icon }).addTo(map);
+        });
+    }
 
     if(coords.length > 1){
-
         const control = L.Routing.control({
-
-            waypoints: coords.map(
-                p => L.latLng(p.lat, p.lon)
-            ),
-
+            waypoints: coords.map(p => L.latLng(p.lat, p.lon)),
             router: L.Routing.osrmv1({
-                serviceUrl:
-                'https://router.project-osrm.org/route/v1',
-                profile:'foot'
+                serviceUrl: 'https://router.project-osrm.org/route/v1',
+                profile: 'foot'
             }),
-
-            lineOptions:{
-                styles:[{
-                    color:'#4A90E2',
-                    weight:5,
-                    opacity:0.85
-                }]
+            lineOptions: {
+                styles: [{ color: '#4A90E2', weight: 5, opacity: 0.85 }]
             },
-
-            createMarker:() => null,
-            show:false,
-            container:null
-
+            createMarker: () => null,
+            show: false,
+            container: L.DomUtil.create('div')
         }).addTo(map);
 
         control.on('routesfound', (e) => {
-
             const r = e.routes[0];
-
-            const km = (
-                r.summary.totalDistance / 1000
-            ).toFixed(1);
-
-            const min = Math.round(
-                r.summary.totalTime / 60
-            );
-
-            document.getElementById('distance')
-                .innerHTML = km + " км";
-
-            document.getElementById('time')
-                .innerHTML = min + " хв";
-
+            const km = (r.summary.totalDistance / 1000).toFixed(1);
+            const min = Math.round(r.summary.totalTime / 60);
+            document.getElementById('distance').innerHTML = km + " км";
+            document.getElementById('time').innerHTML = min + " хв";
         });
-
     }
-
 </script>
 
 {% endif %}
-
 <script>
 
     const menuBtn = document.getElementById("menuBtn");
@@ -905,6 +897,5 @@
     });
 
 </script>
-
 </body>
 </html>
