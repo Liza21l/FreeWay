@@ -1,43 +1,564 @@
 <!DOCTYPE html>
-<html>
+<html lang="uk">
 <head>
-  <title>Архів маршрутів</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
-  <style>
-    .map { height: 400px; width: 100%; margin-bottom: 20px; }
-    .info { padding: 5px; font-size: 14px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Архів маршрутів</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"/>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Inter, Arial, sans-serif;
+}
+
+body{
+    background:#f5f5f5;
+}
+
+.container{
+    max-width:430px;
+    margin:auto;
+    min-height:100vh;
+    padding:20px;
+}
+
+.leaflet-routing-container,
+.leaflet-routing-alt,
+.leaflet-routing-itinerary{
+    display:none !important;
+}
+
+/* HEADER */
+
+.archive-header{
+
+    position:relative;
+
+    background:white;
+
+    border-radius:28px;
+
+    padding:30px 24px;
+
+    text-align:center;
+
+    margin-bottom:25px;
+
+    box-shadow:
+        0 8px 25px rgba(0,0,0,.05);
+
+}
+
+.archive-icon{
+
+    width:72px;
+    height:72px;
+
+    margin:auto;
+    margin-bottom:15px;
+
+    border-radius:22px;
+
+    background:#edf4ff;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:36px;
+
+}
+
+.archive-header h1{
+
+    color:#163867;
+
+    font-size:32px;
+
+    font-weight:800;
+
+    margin-bottom:10px;
+
+}
+
+.archive-header p{
+
+    color:#888;
+
+    line-height:1.6;
+
+}
+
+.back-btn{
+
+    position:absolute;
+
+    left:20px;
+    top:20px;
+
+    width:42px;
+    height:42px;
+
+    border-radius:12px;
+
+    background:#edf4ff;
+
+    text-decoration:none;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    color:#163867;
+
+    font-size:20px;
+
+    font-weight:700;
+
+}
+
+/* ROUTE CARD */
+
+.route-card{
+
+    background:white;
+
+    border-radius:24px;
+
+    padding:20px;
+
+    margin-bottom:20px;
+
+    box-shadow:
+        0 3px 10px rgba(0,0,0,.05);
+
+}
+
+.route-top{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:20px;
+
+}
+
+.route-title{
+
+    font-size:22px;
+
+    font-weight:800;
+
+    color:#163867;
+
+}
+
+.route-date{
+
+    color:#888;
+
+    font-size:14px;
+
+    margin-top:4px;
+
+}
+
+.route-badge{
+
+    background:#e8f8ef;
+
+    color:#2e9d62;
+
+    padding:10px 14px;
+
+    border-radius:14px;
+
+    font-size:13px;
+
+    font-weight:700;
+
+}
+
+.places-title{
+
+    color:#999;
+
+    font-size:12px;
+
+    font-weight:700;
+
+    letter-spacing:1px;
+
+    margin-bottom:12px;
+
+}
+.places-toggle{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    background:#edf4ff;
+
+    color:#163867;
+
+    padding:12px 16px;
+
+    border-radius:14px;
+
+    font-weight:700;
+
+    cursor:pointer;
+
+    margin-bottom:12px;
+
+}
+
+.places-container{
+
+    display:none;
+
+    overflow:hidden;
+
+    animation:fadeIn .25s ease;
+
+}
+
+@keyframes fadeIn{
+
+    from{
+        opacity:0;
+        transform:translateY(-5px);
+    }
+
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+
+}
+.place-item{
+
+    background:#f7f5f2;
+
+    border-radius:14px;
+
+    padding:12px;
+
+    margin-bottom:8px;
+
+    transition:.25s;
+
+}
+
+.place-item:hover{
+
+    transform:translateY(-2px);
+
+}
+
+.place-name{
+
+    color:#163867;
+
+    font-weight:700;
+
+}
+
+.place-info{
+
+    color:#888;
+
+    font-size:13px;
+
+    margin-top:4px;
+
+}
+
+.route-info{
+
+    margin-top:15px;
+
+    margin-bottom:15px;
+
+    background:#edf4ff;
+
+    color:#163867;
+
+    padding:12px;
+
+    border-radius:14px;
+
+    font-weight:600;
+
+}
+
+.map{
+
+    height:280px;
+
+    width:100%;
+
+    border-radius:18px;
+
+    overflow:hidden;
+
+}
+
+.empty{
+
+    background:white;
+
+    border-radius:24px;
+
+    padding:35px 25px;
+
+    text-align:center;
+
+    box-shadow:
+        0 3px 10px rgba(0,0,0,.05);
+
+}
+
+.empty-icon{
+
+    font-size:50px;
+
+    margin-bottom:15px;
+
+}
+
+.empty h3{
+
+    color:#163867;
+
+    margin-bottom:10px;
+
+}
+
+.empty p{
+
+    color:#888;
+
+}
+
+</style>
 </head>
+
 <body>
-  <h2>Архів завершених маршрутів</h2>
 
-  {% if routes_qs %}
-  <ul>
-    {% for route in routes_qs %}
-      <li>
-        <strong>Маршрут №{{ forloop.counter }}</strong>
-        (створено {{ route.created_at|date:"d.m.Y H:i" }})
-        <ul>
-          {% for place in route.places.all %}
-            <li>{{ place.name }} — {{ place.get_category_display }} ({{ place.address }})</li>
-          {% endfor %}
-        </ul>
-        <div id="info-{{ route.id }}" class="info">Маршрут завершений</div>
-        <div id="map-{{ route.id }}" class="map"></div>
-      </li>
-    {% endfor %}
-  </ul>
+<div class="container">
 
-    <!-- тут вже routes — список словників -->
-    {{ routes|json_script:"routes-data" }}
-    {% else %}
-    <p>У вас ще немає завершених маршрутів.</p>
+    <div class="archive-header">
+
+        <a href="{% url 'user_routes' %}" class="back-btn">
+            ←
+        </a>
+
+        <div class="archive-icon">
+            🗂️
+        </div>
+
+        <h1>Архів маршрутів</h1>
+
+        <p>
+            Усі завершені маршрути зберігаються тут
+        </p>
+
+    </div>
+
+    {% if routes_qs %}
+
+      {% for route in routes_qs %}
+
+        <div class="route-card">
+
+            <div class="route-top">
+
+                <div>
+
+                    <div class="route-title">
+                        Маршрут №{{ forloop.counter }}
+                    </div>
+
+                    <div class="route-date">
+                        {{ route.created_at|date:"d.m.Y H:i" }}
+                    </div>
+
+                </div>
+
+                <div class="route-badge">
+                    ✔ Завершено
+                </div>
+
+            </div>
+
+            <div class="places-toggle" onclick="togglePlaces('{{ route.id }}')">
+                  📍 Точки маршруту
+                  <span id="arrow-{{ route.id }}">▼</span>
+            </div>
+
+            <div id="places-{{ route.id }}" class="places-container">
+
+              {% for place in route.places.all %}
+
+                <div class="place-item">
+
+                    <div class="place-name">
+                        {{ place.name }}
+                    </div>
+
+                    <div class="place-info">
+                        {{ place.get_category_display }}
+                        •
+                        {{ place.address }}
+                    </div>
+
+                </div>
+
+              {% empty %}
+
+                <div class="empty">
+                    <div class="empty-icon">📍</div>
+                    <p>У цьому маршруті немає точок</p>
+                </div>
+
+              {% endfor %}
+
+            </div>
+
+            {{ routes|json_script:"routes-data" }}
+
+        </div>
+
+      {% empty %}
+
+        <div class="empty">
+
+            <div class="empty-icon">
+                🗺️
+            </div>
+
+            <h3>
+                У вас ще немає завершених маршрутів
+            </h3>
+
+            <p>
+                Після завершення маршрути будуть
+                зберігатися тут
+            </p>
+
+        </div>
+
+      {% endfor %}
+
     {% endif %}
 
+</div>
 
-  <a href="{% url 'user_routes' %}">← Повернутися до моїх маршрутів</a>
-</body>
-</html>
+<script>
+
+  const routes =
+      JSON.parse(
+          document.getElementById("routes-data").textContent
+      );
+
+  routes.forEach(route => {
+
+      if(route.coords.length === 0) return;
+
+      const map =
+          L.map(`map-${route.id}`)
+          .setView(
+              [route.coords[0].lat,
+              route.coords[0].lon],
+              15
+          );
+
+      L.tileLayer(
+          "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+          {
+              attribution:"© OpenStreetMap"
+          }
+      ).addTo(map);
+
+      route.coords.forEach((place,index) => {
+
+          const icon = L.divIcon({
+
+              html:`
+              <div style="
+                  width:30px;
+                  height:30px;
+                  border-radius:50%;
+                  background:#163867;
+                  color:white;
+                  display:flex;
+                  align-items:center;
+                  justify-content:center;
+                  font-weight:700;
+                  border:2px solid white;
+              ">
+                  ${index+1}
+              </div>
+              `,
+
+              iconSize:[30,30],
+              iconAnchor:[15,15]
+
+          });
+
+          L.marker(
+              [place.lat,place.lon],
+              {icon}
+          ).addTo(map);
+
+      });
+
+  });
+  function togglePlaces(routeId){
+
+    const places =
+        document.getElementById(
+            `places-${routeId}`
+        );
+
+    const arrow =
+        document.getElementById(
+            `arrow-${routeId}`
+        );
+
+    if(places.style.display === "block"){
+
+        places.style.display = "none";
+
+        arrow.innerHTML = "▼";
+
+    }else{
+
+        places.style.display = "block";
+
+        arrow.innerHTML = "▲";
+
+    }
+}
+
+  </script>
+
+  </body>
+  </html>
