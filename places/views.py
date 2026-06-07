@@ -92,6 +92,11 @@ def shared_route_view(request, share_uuid):
     ]
 
     if request.method == "POST":
+        # якщо користувач є автором маршруту → показуємо помилку
+        if request.user == route.user:
+            messages.error(request, "Цей маршрут вже належить вам — ви не можете додати його вдруге.")
+            return redirect("user_routes")
+
         # створюємо копію маршруту для поточного користувача
         new_route = UserRoute.objects.create(
             user=request.user,
@@ -105,12 +110,14 @@ def shared_route_view(request, share_uuid):
         # додаємо користувача у "друзі по маршруту"
         route.friends.add(request.user)
 
+        messages.success(request, "Маршрут успішно додано до ваших маршрутів ✅")
         return redirect("user_routes")
 
     return render(request, "places/shared_route.html", {
         "route": route,
         "coords": coords,
-})
+    })
+
 
 @login_required
 def home_view(request):
