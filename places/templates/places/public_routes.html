@@ -364,16 +364,7 @@ body{
 
                     {% if route.share_uuid %}
 
-                    <a
-                        href="#"
-                        class="share-btn"
-                        onclick="
-                            event.stopPropagation();
-                            navigator.clipboard.writeText('{{ request.build_absolute_uri }}');
-                            alert('Посилання скопійовано!');
-                            return false;
-                        "
-                    >
+                     <a href="#" class="share-btn" data-url="{{ request.build_absolute_uri|cut:request.path }}{% url 'shared_route' route.share_uuid %}">
                         🔗 Поділитися
                     </a>
 
@@ -459,7 +450,20 @@ function toggleRoute(button){
         ? '▲'
         : '▼';
 }
-
+document.querySelectorAll('.share-btn').forEach(button => {
+    button.addEventListener('click', function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        const urlToCopy = this.getAttribute('data-url');
+        
+        navigator.clipboard.writeText(urlToCopy).then(() => {
+            alert('Посилання скопійовано!');
+        }).catch(err => {
+            console.error('Не вдалося скопіювати: ', err);
+        });
+    });
+});
 </script>
 </body>
 </html>
