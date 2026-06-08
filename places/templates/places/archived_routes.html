@@ -356,6 +356,98 @@ body{
     color:#888;
 
 }
+/* ---------- ПЛАНШЕТ ---------- */
+
+@media (min-width:768px){
+
+    .container{
+        max-width:900px;
+        padding:30px;
+    }
+
+    .archive-header{
+        padding:40px;
+    }
+
+    .archive-header h1{
+        font-size:42px;
+    }
+
+    .archive-header p{
+        font-size:16px;
+    }
+
+    .route-card{
+        padding:25px;
+    }
+
+    .map{
+        height:350px;
+    }
+}
+
+
+/* ---------- КОМП'ЮТЕР ---------- */
+
+@media (min-width:1200px){
+
+    .container{
+        max-width:1400px;
+        padding:40px 50px;
+    }
+
+    .archive-header{
+        padding:50px;
+        margin-bottom:35px;
+    }
+
+    .archive-header h1{
+        font-size:52px;
+    }
+
+    .archive-header p{
+        font-size:18px;
+        max-width:700px;
+        margin:auto;
+    }
+
+    .archive-icon{
+        width:90px;
+        height:90px;
+        font-size:44px;
+    }
+
+    /* маршрути по 2 в ряд */
+
+    .routes-grid{
+        display:grid;
+        grid-template-columns:repeat(2, 1fr);
+        gap:25px;
+        align-items:start;
+    }
+
+    .route-card{
+        height:auto;
+        align-self:start;
+        padding:28px;
+    }
+
+    .route-title{
+        font-size:26px;
+    }
+
+    .route-date{
+        font-size:15px;
+    }
+
+    .route-badge{
+        padding:12px 16px;
+    }
+
+    .map{
+        height:400px;
+    }
+}
 
 </style>
 </head>

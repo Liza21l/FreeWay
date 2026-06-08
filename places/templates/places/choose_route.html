@@ -268,7 +268,192 @@ body{
     opacity:.9;
 }
 
+/* ===== ADAPTIVE ===== */
 
+/* Планшети */
+@media (max-width: 1024px){
+
+    body{
+        padding:16px;
+    }
+
+    .container{
+        max-width:700px;
+    }
+
+    .hero-title{
+        font-size:38px;
+    }
+
+    .route-card h3{
+        font-size:30px;
+    }
+
+}
+
+/* Телефони */
+@media (max-width: 768px){
+
+    body{
+        padding:0;
+    }
+
+    .container{
+        max-width:100%;
+        min-height:100vh;
+        border-radius:0;
+        border:none;
+    }
+
+    .content{
+        padding:20px;
+    }
+
+    .header{
+        height:80px;
+    }
+
+    .header h2{
+        font-size:20px;
+    }
+
+    .hero-title{
+        font-size:34px;
+    }
+
+    .hero-text{
+        font-size:15px;
+    }
+
+    .route-card{
+        padding:20px;
+        border-radius:24px;
+    }
+
+    .route-card h3{
+        font-size:28px;
+    }
+
+    .card-icon{
+        width:48px;
+        height:48px;
+        font-size:22px;
+    }
+
+    .card-arrow{
+        width:36px;
+        height:36px;
+    }
+
+}
+
+/* Маленькі телефони */
+@media (max-width: 480px){
+
+    .content{
+        padding:18px;
+    }
+
+    .hero-title{
+        font-size:26px;
+        line-height:1.15;
+    }
+
+    .hero-text{
+        font-size:14px;
+        line-height:1.6;
+    }
+
+    .location-box{
+        padding:14px;
+    }
+
+    .location-name{
+        font-size:14px;
+    }
+
+    .route-card{
+        padding:18px;
+        border-radius:22px;
+    }
+
+    .route-card h3{
+        font-size:22px;
+    }
+
+    .route-card p{
+        font-size:14px;
+        line-height:1.5;
+    }
+
+    .card-icon{
+        width:44px;
+        height:44px;
+        font-size:20px;
+        border-radius:14px;
+    }
+
+    .card-arrow{
+        width:34px;
+        height:34px;
+        font-size:16px;
+    }
+
+    .card-badge{
+        font-size:11px;
+        padding:5px 10px;
+    }
+    .back-btn{
+        margin-right: 10px;
+    }
+
+}
+/* ===== ПК ===== */
+
+@media (min-width: 1200px){
+
+    .container{
+        max-width:1100px;
+    }
+
+    .content{
+        padding:40px;
+    }
+
+    .hero-title{
+        font-size:58px;
+    }
+
+    .hero-text{
+        font-size:18px;
+        max-width:650px;
+    }
+
+    .route-card{
+        padding:28px;
+    }
+
+    .route-card h3{
+        font-size:38px;
+    }
+
+    .route-card p{
+        font-size:16px;
+    }
+
+    .card-icon{
+        width:60px;
+        height:60px;
+        font-size:28px;
+    }
+
+    .card-arrow{
+        width:46px;
+        height:46px;
+        font-size:20px;
+    }
+
+}
 
 </style>
 </head>

@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Маршрут {{ route.id }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -21,7 +22,8 @@ body{
 }
 
 .container{
-    max-width:430px;
+    width:100%;
+    max-width:1400px;
     margin:auto;
     min-height:100vh;
     background:#f7f5f2;
@@ -129,7 +131,146 @@ body{
 .leaflet-routing-itinerary{
     display:none !important;
 }
+/* ---------- ТЕЛЕФОН ---------- */
 
+@media (max-width:767px){
+
+    .header{
+        padding:20px;
+        padding-top:50px;
+    }
+
+    .header h1{
+        font-size:26px;
+    }
+
+    .header p{
+        font-size:14px;
+    }
+
+    .messages{
+        padding:15px;
+    }
+
+    .info-card{
+        margin:15px;
+        border-radius:20px;
+    }
+
+    #info{
+        font-size:15px;
+    }
+
+    .map-card{
+        margin:0 15px;
+        border-radius:20px;
+    }
+
+    #map{
+        height:400px;
+    }
+
+    .route-form{
+        padding:15px;
+    }
+
+    .add-btn{
+        height:54px;
+        font-size:15px;
+    }
+}
+
+
+/* ---------- ПЛАНШЕТ ---------- */
+
+@media (min-width:768px){
+
+    .header{
+        padding:35px;
+        padding-top:65px;
+    }
+
+    .header h1{
+        font-size:40px;
+    }
+
+    .header p{
+        font-size:16px;
+        max-width:700px;
+    }
+
+    .messages{
+        padding:25px 35px;
+    }
+
+    .info-card{
+        margin:25px 35px;
+    }
+
+    .map-card{
+        margin:0 35px;
+    }
+
+    #map{
+        height:600px;
+    }
+
+    .route-form{
+        padding:25px 35px 35px;
+    }
+}
+
+
+/* ---------- КОМП'ЮТЕР ---------- */
+
+@media (min-width:1200px){
+
+    .header{
+        padding:50px;
+        padding-top:70px;
+    }
+
+    .header h1{
+        font-size:52px;
+    }
+
+    .header p{
+        font-size:18px;
+        max-width:800px;
+    }
+
+    .messages{
+        padding:30px 50px;
+    }
+
+    .info-card{
+        margin:30px 50px;
+        padding:24px;
+    }
+
+    #info{
+        font-size:18px;
+    }
+
+    .map-card{
+        margin:0 50px;
+    }
+
+    #map{
+        height:700px;
+    }
+
+    .route-form{
+        padding:30px 50px 50px;
+    }
+
+    .add-btn{
+        max-width:350px;
+        margin:auto;
+        display:block;
+        font-size:17px;
+    }
+}
 </style>
 </head>
 <body>

@@ -173,6 +173,170 @@
             border-radius:12px;
             font-size:14px;
         }
+        /* ---------- ТЕЛЕФОНИ ---------- */
+
+        @media (max-width:480px){
+
+            .auth-container{
+                padding:20px 12px;
+            }
+
+            .auth-card{
+                padding:28px 20px;
+                border-radius:24px;
+            }
+
+            .logo{
+                width:60px;
+                height:60px;
+                font-size:26px;
+                margin-bottom:20px;
+            }
+
+            .title{
+                font-size:28px;
+            }
+
+            .subtitle{
+                font-size:14px;
+                margin-bottom:25px;
+            }
+
+            .form-group{
+                margin-bottom:15px;
+            }
+
+            .form-group label{
+                font-size:13px;
+            }
+
+            .form-group input{
+                height:52px;
+                font-size:14px;
+            }
+
+            .submit-btn,
+            .google-btn{
+                height:52px;
+                font-size:15px;
+            }
+
+            .bottom-text{
+                font-size:14px;
+            }
+
+            .errors{
+                font-size:13px;
+                padding:10px;
+            }
+        }
+
+
+        /* ---------- ПЛАНШЕТИ ---------- */
+
+        @media (min-width:768px){
+
+            .auth-card{
+                max-width:650px;
+                padding:50px;
+            }
+
+            .logo{
+                width:80px;
+                height:80px;
+                font-size:34px;
+            }
+
+            .title{
+                font-size:42px;
+            }
+
+            .subtitle{
+                font-size:17px;
+            }
+
+            .form-group label{
+                font-size:15px;
+            }
+
+            .form-group input{
+                height:60px;
+                font-size:16px;
+            }
+
+            .submit-btn,
+            .google-btn{
+                height:60px;
+                font-size:17px;
+            }
+
+            .errors{
+                font-size:15px;
+            }
+        }
+
+
+        /* ---------- КОМП'ЮТЕРИ ---------- */
+
+        @media (min-width:1200px){
+
+            .auth-container{
+                padding:50px;
+            }
+
+            .auth-card{
+                max-width:850px;
+                padding:60px;
+                border-radius:36px;
+            }
+
+            .logo{
+                width:90px;
+                height:90px;
+                font-size:38px;
+                border-radius:24px;
+            }
+
+            .title{
+                font-size:52px;
+            }
+
+            .subtitle{
+                font-size:18px;
+                max-width:600px;
+                margin:0 auto 40px;
+            }
+
+            .form-group{
+                margin-bottom:24px;
+            }
+
+            .form-group label{
+                font-size:16px;
+            }
+
+            .form-group input{
+                height:64px;
+                font-size:17px;
+                border-radius:18px;
+            }
+
+            .submit-btn,
+            .google-btn{
+                height:64px;
+                font-size:18px;
+                border-radius:18px;
+            }
+
+            .bottom-text{
+                font-size:17px;
+            }
+
+            .errors{
+                font-size:15px;
+                padding:15px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -230,11 +394,7 @@
 
         </form>
 
-        <div class="divider">або</div>
-
-        <button class="google-btn">
-            Продовжити з Google
-        </button>
+        <div class="divider"></div>
 
         <p class="bottom-text">
             Вже маєш акаунт?

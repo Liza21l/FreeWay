@@ -20,7 +20,8 @@ body{
 }
 
 .container{
-    max-width:430px;
+    width:100%;
+    max-width:1400px;
     margin:auto;
     min-height:100vh;
     background:#f7f5f2;
@@ -220,6 +221,89 @@ body{
 
 .empty p{
     color:#888;
+}
+@media (max-width:480px){
+
+    .route-top{
+        align-items:flex-start;
+    }
+
+    .route-date{
+        margin-left: 10px;
+        margin-top:0;
+        align-self:flex-start;
+    }
+
+}
+/* ---------- ПЛАНШЕТ ---------- */
+
+@media (min-width:768px){
+
+    .header{
+        padding:80px 40px 35px;
+    }
+
+    .header h1{
+        font-size:42px;
+    }
+
+    .routes{
+        padding:35px 40px;
+    }
+
+    .route-card{
+        padding:24px;
+    }
+}
+
+
+/* ---------- КОМП'ЮТЕР ---------- */
+
+@media (min-width:1200px){
+
+    .header{
+        padding:90px 50px 40px;
+    }
+
+    .header h1{
+        font-size:48px;
+    }
+
+    .routes{
+        padding:40px 50px;
+
+        display:grid;
+        grid-template-columns:repeat(2, 1fr);
+        gap:24px;
+    }
+
+    .route-card{
+        margin-bottom:0;
+        height:fit-content;
+    }
+
+    .route-title{
+        font-size:24px;
+    }
+
+    .place-tag{
+        padding:14px;
+    }
+
+    .share-btn{
+        padding:14px 22px;
+        font-size:15px;
+    }
+}
+
+
+/* ---------- ВЕЛИКІ МОНІТОРИ ---------- */
+
+@media (min-width:1600px){
+
+    .routes{
+        grid-template-columns:repeat(3, 1fr);
+    }
 }
 
 </style>
