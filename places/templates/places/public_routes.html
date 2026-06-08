@@ -369,12 +369,14 @@ body{
                         class="share-btn"
                         onclick="
                             event.stopPropagation();
-                            navigator.clipboard.writeText(this.href);
+                            navigator.clipboard.writeText('{{ request.build_absolute_uri }}');
                             alert('Посилання скопійовано!');
+                            return false;
                         "
                     >
                         🔗 Поділитися
                     </a>
+
 
                     {% endif %}
 
