@@ -69,8 +69,9 @@ def nearby_places(request):
                 }
             )
             route.places.add(place_obj)
-
-        return redirect("home")
+        return JsonResponse({
+            "places": result
+        })
 
     return render(request, "places/nearby.html")
 
@@ -312,6 +313,13 @@ def user_routes_view(request):
         "public_routes": public_routes  
     })
 
+@login_required
+def delete_route(request, route_id):
+    route = get_object_or_404(UserRoute, id=route_id, user=request.user)
+    if request.method == "POST":
+        route.delete()
+        messages.success(request, "Маршрут успішно видалено ❌")
+        return redirect("user_routes")
 
 @login_required
 def select(request):

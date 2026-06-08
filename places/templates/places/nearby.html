@@ -223,9 +223,10 @@ body{
     font-weight:600;
 }
 
-#map{
-    height:380px;
-    width:100%;
+#map {
+  width: 100%;
+  height: 400px; /* або більше */
+  margin-top: 15px;
 }
 
 /* PLACES */
@@ -263,7 +264,6 @@ body{
 </style>
 </head>
 <body>
-
 <div class="container">
 
     <div class="header">
@@ -279,15 +279,29 @@ body{
         </p>
 
     </div>
+    <div id="info" style="display:none; text-align:center; margin:10px; font-weight:bold;">
+      Побудова маршруту...
+    </div>
 
     <div class="search-card">
+      {% if messages %}
+        <div class="container mt-3">
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
 
         <div class="section-title">
             КАТЕГОРІЇ
         </div>
 
-        <form id="categories-form">
-
+        <form id="categories-form" method="post" action="{% url 'nearby_places' %}">
+            {% csrf_token %}
             <div class="categories-grid">
 
                 <div class="category-card">
@@ -406,10 +420,6 @@ body{
                 Ваш маршрут
             </div>
 
-            <div id="info">
-                Побудова маршруту...
-            </div>
-
         </div>
 
         <div id="map"></div>
@@ -421,91 +431,116 @@ body{
     </div>
 
 </div>
-
 <script>
     let userLat, userLon;
+    let map = null;
+    let routingControl = null;
 
-    // 1. Запит геолокації
+    // Отримуємо геолокацію користувача
     navigator.geolocation.getCurrentPosition(pos => {
-      userLat = pos.coords.latitude;
-      userLon = pos.coords.longitude;
+        userLat = pos.coords.latitude;
+        userLon = pos.coords.longitude;
     }, err => {
-      alert("Не вдалося отримати геолокацію: " + err.message);
+        alert("Не вдалося отримати геолокацію: " + err.message);
     });
 
-    // 2. Вибір категорій і запит до Django
     document.getElementById("categories-form").addEventListener("submit", e => {
-      e.preventDefault();
-      const categories = Array.from(document.querySelectorAll("input[name=categories]:checked"))
-                              .map(cb => cb.value);
+        e.preventDefault();
 
-      fetch("{% url 'nearby_places' %}", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": "{{ csrf_token }}"
-        },
-        body: JSON.stringify({ lat: userLat, lon: userLon, categories: categories })
-      })
-      .then(res => res.json())
-      .then(data => {
-        const places = data.places;
-        if (places.length === 0) {
-          document.getElementById("info").innerHTML = "Немає місць у вибраних категоріях.";
-          return;
-        }
+        const categories = Array.from(document.querySelectorAll("input[name=categories]:checked"))
+                                .map(cb => cb.value);
 
-        const map = L.map("map").setView([userLat, userLon], 14);
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          attribution: "© OpenStreetMap"
-        }).addTo(map);
+        // ✅ ховаємо блок із категоріями
+        document.querySelector(".search-card").style.display = "none";
 
-        // Маркер старту (користувач)
-        const userIcon = L.divIcon({
-          html: `<div style="
-            background:#E84A4A; color:#fff; border-radius:50%;
-            width:30px; height:30px; display:flex;
-            align-items:center; justify-content:center;
-            font-weight:bold; font-size:14px;
-            border:2px solid #fff; box-shadow:0 2px 5px rgba(0,0,0,.3);
-          ">🚶</div>`,
-          iconSize: [30, 30],
-          iconAnchor: [15, 15],
-          popupAnchor: [0, -18]
+        // ✅ показуємо повідомлення про завантаження
+        const infoBlock = document.getElementById("info");
+        infoBlock.style.display = "block";
+        infoBlock.innerHTML = "Побудова маршруту...";
+
+        fetch("{% url 'nearby_places' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({ lat: userLat, lon: userLon, categories: categories })
+        })
+        .then(res => res.json())
+        .then(data => {
+            const places = data.places;
+
+            document.getElementById("resultCard").style.display = "block";
+
+            if (places.length === 0) {
+                infoBlock.innerHTML = "Немає місць у вибраних категоріях.";
+                return;
+            }
+
+            // ✅ після успішного створення маршруту ховаємо блок info
+            infoBlock.style.display = "none";
+
+            if (map !== null) {
+                map.remove();
+            }
+            map = L.map("map").setView([userLat, userLon], 14);
+
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                attribution: "© OpenStreetMap"
+            }).addTo(map);
+
+            const userIcon = L.divIcon({
+                html: `<div style="
+                    background:#E84A4A; color:#fff; border-radius:50%;
+                    width:30px; height:30px; display:flex;
+                    align-items:center; justify-content:center;
+                    font-weight:bold; font-size:14px;
+                    border:2px solid #fff; box-shadow:0 2px 5px rgba(0,0,0,.3);
+                ">🚶</div>`,
+                iconSize: [30, 30],
+                iconAnchor: [15, 15],
+                popupAnchor: [0, -18]
+            });
+
+            L.marker([userLat, userLon], { icon: userIcon })
+              .bindPopup("Ви тут")
+              .addTo(map);
+
+            places.forEach((p, i) => {
+                L.marker([p.lat, p.lon])
+                  .bindPopup(`${i+1}. ${p.name} (${p.category})`)
+                  .addTo(map);
+            });
+
+            const waypoints = [L.latLng(userLat, userLon)].concat(
+                places.map(p => L.latLng(p.lat, p.lon))
+            );
+
+            if (routingControl !== null) {
+                map.removeControl(routingControl);
+            }
+
+            routingControl = L.Routing.control({
+                waypoints: waypoints,
+                router: L.Routing.osrmv1({
+                    serviceUrl: "https://router.project-osrm.org/route/v1",
+                    profile: "foot"
+                }),
+                lineOptions: { styles: [{ color: "#4A90E2", weight: 5, opacity: 0.85 }] },
+                createMarker: () => null,
+                show: false,
+                addWaypoints: false,
+                draggableWaypoints: false,
+                fitSelectedRoutes: true,
+                showAlternatives: false,
+                altLineOptions: { styles: [] }
+            }).addTo(map);
+        })
+        .catch(err => {
+            console.error("Помилка при побудові маршруту:", err);
+            infoBlock.style.display = "block";
+            infoBlock.innerHTML = "Сталася помилка при побудові маршруту.";
         });
-
-        L.marker([userLat, userLon], { icon: userIcon })
-          .bindPopup("Ви тут")
-          .addTo(map);
-
-
-        // Маркери закладів
-        places.forEach((p, i) => {
-          L.marker([p.lat, p.lon]).bindPopup(`${i+1}. ${p.name} (${p.category})`).addTo(map);
-        });
-
-        // Маршрут: стартова точка + заклади
-        const waypoints = [L.latLng(userLat, userLon)].concat(
-          places.map(p => L.latLng(p.lat, p.lon))
-        );
-
-        L.Routing.control({
-          waypoints: waypoints,
-          router: L.Routing.osrmv1({ serviceUrl: "https://router.project-osrm.org/route/v1", profile: "foot" }),
-          lineOptions: { styles: [{ color: "#4A90E2", weight: 5, opacity: 0.85 }] },
-          createMarker: () => null,
-          
-          // --- ДОДАЙТЕ АБО ЗМІНІТЬ ЦІ ПАРАМЕТРИ ---
-          show: false,                 // Ховає саму панель
-          addWaypoints: false,         // Вимикає можливість додавати точки кліком
-          draggableWaypoints: false,   // Вимикає перетягування точок маршруту
-          fitSelectedRoutes: true,     // Автоматично масштабує карту під маршрут
-          
-          // Головне рішення: ховаємо альтернативні маршрути та текстовий контейнер
-          showAlternatives: false,
-          altLineOptions: { styles: [] } 
-        }).addTo(map);
-      });
     });
 </script>
 </body>

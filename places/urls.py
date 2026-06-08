@@ -19,6 +19,6 @@ urlpatterns = [
     path("nearby/", views.nearby_places, name="nearby_places"),
     path("choose-route/", views.choose_route, name="choose_route"),
     path("routes/share/<uuid:share_uuid>/", views.shared_route_view, name="shared_route"),
-
+    path("my-routes/delete/<int:route_id>/", views.delete_route, name="delete_route")
 
 ]
