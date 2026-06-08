@@ -33,7 +33,9 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 DEBUG = True
 
 ALLOWED_HOSTS = ["freeway-production.up.railway.app"]
-
+CSRF_TRUSTED_ORIGINS = [
+    "https://freeway-production.up.railway.app"
+]
 
 # Application definition
 
