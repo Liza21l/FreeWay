@@ -70,7 +70,7 @@ def nearby_places(request):
             )
             route.places.add(place_obj)
 
-        return JsonResponse({"places": result})
+        return redirect("home")
 
     return render(request, "places/nearby.html")
 
