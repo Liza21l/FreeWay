@@ -27,8 +27,34 @@ body{
 }
 
 /* HEADER */
+.back-btn{
+    left:20px;
+    top:20px;
 
+    width:42px;
+    height:42px;
+
+    border-radius:12px;
+
+    background:rgba(255,255,255,.12);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    color:white;
+    text-decoration:none;
+    font-size:20px;
+    font-weight:700;
+
+    transition:.2s;
+}
+
+.back-btn:hover{
+    background:rgba(255,255,255,.2);
+}
 .profile-header{
+    position:relative;
     background:#163867;
     padding:30px 24px;
     color:white;
@@ -581,6 +607,9 @@ body{
     <!-- HEADER -->
 
     <div class="profile-header">
+        <a href="{% url 'home' %}" class="back-btn">
+            ←
+        </a>
 
         <div class="profile-top">
 

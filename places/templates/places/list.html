@@ -353,35 +353,43 @@ body{
     border-color:#163867;
     background:#edf4ff;
 }
-
-/* КНОПКИ В МОДАЛЬНОМУ ВІКНІ */
-#applyFilter, #closeFilter {
-    width:100%;
-    padding:12px;
-    border:none;
-    border-radius:14px;
-    font-size:15px;
-    font-weight:600;
-    cursor:pointer;
-    margin-top:8px;
-    transition:0.3s;
+#choosePrivate, #choosePublic, #closeVisibility {
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:14px;
+  font-size:15px;
+  font-weight:600;
+  cursor:pointer;
+  margin-top:8px;
+  transition:0.3s;
 }
 
-#applyFilter {
-    background:#163867;
-    color:white;
+/* Основний стиль */
+#choosePrivate {
+  background:#163867;
+  color:white;
 }
-#applyFilter:hover {
-    background:#0f2850;
+#choosePublic {
+  background:#163867;
+  color:white;
+}
+#closeVisibility {
+  background:#f3f3f3;
+  color:#666;
 }
 
-#closeFilter {
-    background:#f3f3f3;
-    color:#666;
+/* Ховер-ефекти */
+#choosePrivate:hover,
+#choosePublic:hover {
+  background:#0f2850; /* трохи темніший синій */
 }
-#closeFilter:hover {
-    background:#e2e2e2;
+
+#closeVisibility:hover {
+  background:#e2e2e2; /* трохи темніший сірий */
 }
+
+
 
 /* Анімація появи */
 @keyframes fadeIn {
@@ -608,18 +616,22 @@ body{
             {% endfor %}
         </div>
 
-        <label>
-          <input type="radio" name="visibility" value="private" checked> Особистий
-        </label>
-        <label>
-          <input type="radio" name="visibility" value="public"> Публічний
-        </label>
+        <input type="hidden" name="visibility" id="visibilityInput" value="private">
 
         <button type="submit" class="submit-btn" id="submitBtn">
             <span id="btnText">Скласти маршрут</span>
             <div class="loader" id="loader"></div>
         </button>
     </form>
+
+    <div id="visibilityModal" class="filter-modal" style="display:none;">
+        <div class="filter-content">
+            <h3>Зробити маршрут</h3>
+            <button type="button" id="choosePrivate">Особистий</button>
+            <button type="button" id="choosePublic">Публічний</button>
+            <button type="button" id="closeVisibility">Закрити</button>
+        </div>
+    </div>
 
 </div>
 
@@ -688,6 +700,41 @@ body{
         });
         document.getElementById("filterModal").style.display = "none";
     });
+
+const visibilityModal = document.getElementById("visibilityModal");
+const visibilityInput = document.getElementById("visibilityInput");
+
+routeForm.addEventListener("submit", function(e){
+    e.preventDefault(); // зупиняємо стандартний submit
+    visibilityModal.style.display = "flex"; // показуємо модальне вікно
+});
+
+// вибір приватного
+document.getElementById("choosePrivate").addEventListener("click", () => {
+    visibilityInput.value = "private";
+    finalizeSubmit();
+});
+
+// вибір публічного
+document.getElementById("choosePublic").addEventListener("click", () => {
+    visibilityInput.value = "public";
+    finalizeSubmit();
+});
+
+// закрити модальне вікно
+document.getElementById("closeVisibility").addEventListener("click", () => {
+    visibilityModal.style.display = "none";
+});
+
+function finalizeSubmit(){
+    visibilityModal.style.display = "none";
+    step3.classList.remove("active");
+    step3.classList.add("completed");
+    step3Circle.innerHTML = "✓";
+    loader.style.display = "block";
+    btnText.innerHTML = "Створення маршруту...";
+    routeForm.submit(); // тепер відправляємо форму
+}
 </script>
 
 
