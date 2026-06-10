@@ -701,7 +701,27 @@ function toggleRoute(routeId){
         block.style.display = "block";
         setTimeout(() => {
             const mapElement = document.getElementById(`map-${routeId}`);
-            if(mapElement._leaflet_map){
+            if(mapElement && mapElement._leaflet_map){
+                mapElement._leaflet_map.invalidateSize();
+                if(mapElement._markersBounds){
+                    mapElement._leaflet_map.fitBounds(
+                        mapElement._markersBounds,
+                        { padding:[30,30], maxZoom:16 }
+                    );
+                }
+            }
+        }, 300);
+    }
+}
+
+// нова функція — завжди відкриває потрібний маршрут
+function openRoute(routeId){
+    const block = document.getElementById(`route-${routeId}`);
+    if(block){
+        block.style.display = "block";
+        setTimeout(() => {
+            const mapElement = document.getElementById(`map-${routeId}`);
+            if(mapElement && mapElement._leaflet_map){
                 mapElement._leaflet_map.invalidateSize();
                 if(mapElement._markersBounds){
                     mapElement._leaflet_map.fitBounds(
@@ -732,7 +752,6 @@ routes.forEach(route => {
     const markers = [];
 
     if (route.has_start_location) {
-        // перша точка — геолокація користувача
         const start = route.coords[0];
         const userIcon = L.divIcon({
             html: `<div style="
@@ -749,7 +768,6 @@ routes.forEach(route => {
             .addTo(map);
         markers.push(userMarker);
 
-        // решта точок стандартні
         route.coords.slice(1).forEach((place, index) => {
             const icon = L.divIcon({
                 html: `<div style="
@@ -768,7 +786,6 @@ routes.forEach(route => {
             markers.push(marker);
         });
     } else {
-        // якщо геолокації немає → всі точки стандартні
         route.coords.forEach((place, index) => {
             const icon = L.divIcon({
                 html: `<div style="
@@ -818,12 +835,25 @@ routes.forEach(route => {
         });
     }
 });
+
 window.addEventListener("DOMContentLoaded", () => {
     const msgBlock = document.getElementById("messagesBlock");
     if (msgBlock) {
       msgBlock.scrollIntoView({ behavior: "smooth", block: "start" });
     }
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+  const openRouteId = "{{ open_route_id|default:'' }}";
+  if (openRouteId) {
+    openRoute(openRouteId); // відкриває потрібний маршрут
+    const detailsBlock = document.getElementById("route-" + openRouteId);
+    if(detailsBlock){
+      detailsBlock.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+});
 </script>
+
 </body>
 </html>

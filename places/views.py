@@ -283,9 +283,6 @@ def profile_view(request):
     })
 @login_required
 def user_routes_view(request):
-    """
-    Показує всі маршрути, створені користувачем.
-    """
     routes_qs = UserRoute.objects.filter(user=request.user).prefetch_related('places')
     private_routes = routes_qs.filter(visibility='private', status='active')
     public_routes  = routes_qs.filter(visibility='public', status='active')
@@ -296,7 +293,6 @@ def user_routes_view(request):
             {"lat": p.lat, "lon": p.lon, "name": p.name, "category": p.category}
             for p in r.places.all()
         ]
-
         if r.has_start_location and r.start_lat and r.start_lon:
             coords.insert(0, {
                 "lat": r.start_lat,
@@ -304,7 +300,6 @@ def user_routes_view(request):
                 "name": "Ви тут",
                 "category": "start"
             })
-
         routes.append({
             "id": r.id,
             "created_at": r.created_at.strftime("%Y-%m-%d %H:%M"),
@@ -312,12 +307,16 @@ def user_routes_view(request):
             "has_start_location": r.has_start_location
         })
 
+    # параметр open
+    open_route_id = request.GET.get("open")
 
     return render(request, "places/my_routes.html", {
         "routes": routes,
         "private_routes": private_routes,
-        "public_routes": public_routes  
+        "public_routes": public_routes,
+        "open_route_id": open_route_id,
     })
+
 
 @login_required
 def delete_route(request, route_id):

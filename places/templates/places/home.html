@@ -635,11 +635,10 @@
     <div class="map-card">
 
         <div class="map-header">
-
-            <span>
-                Поточний маршрут
-            </span>
-
+            <span> Поточний маршрут</span>
+            <a href="{% url 'user_routes' %}?open={{ latest_route.id }}" class="details-btn">
+                Деталі
+            </a>
         </div>
 
         <div id="map"></div>
