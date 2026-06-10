@@ -485,6 +485,7 @@ body{
 
         const categories = Array.from(document.querySelectorAll("input[name=categories]:checked"))
                                 .map(cb => cb.value);
+        const routeName = document.getElementById("routeName").value.trim();
 
         // ✅ ховаємо блок із категоріями
         document.querySelector(".search-card").style.display = "none";
@@ -500,7 +501,12 @@ body{
                 "Content-Type": "application/json",
                 "X-CSRFToken": "{{ csrf_token }}"
             },
-            body: JSON.stringify({ lat: userLat, lon: userLon, categories: categories })
+            body: JSON.stringify({ 
+                lat: userLat, 
+                lon: userLon, 
+                categories: categories,
+                route_name: routeName
+            })
         })
         .then(res => res.json())
         .then(data => {
@@ -516,6 +522,21 @@ body{
             // ✅ після успішного створення маршруту ховаємо блок info
             infoBlock.style.display = "none";
 
+            // ✅ показуємо назву маршруту у результатах
+            document.querySelector(".result-header .route-title").textContent = data.route_name;
+
+            // ✅ показуємо список місць
+            const list = document.getElementById("placesList");
+            list.innerHTML = "";
+            places.forEach((p, i) => {
+                const div = document.createElement("div");
+                div.className = "place-item";
+                div.innerHTML = `<div class="place-name">${i+1}. ${p.name}</div>
+                                 <div class="place-category">${p.category}</div>`;
+                list.appendChild(div);
+            });
+
+            // ✅ малюємо карту
             if (map !== null) {
                 map.remove();
             }

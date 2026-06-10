@@ -39,17 +39,12 @@ def nearby_places(request):
         all_places = fetch_places_nearby(lat, lon, categories)
         result = []
 
-        # групуємо по категоріях
         for cat in categories:
             cat_places = [p for p in all_places if p["category"] == cat]
-
-            # сортуємо по відстані від користувача
             cat_places_sorted = sorted(
                 cat_places,
                 key=lambda p: haversine(lat, lon, p["lat"], p["lon"])
             )
-
-            # якщо музей або пам’ятка → беремо 2, інакше 1
             limit = 2 if cat in ["museum", "tourist_attraction"] else 1
             result.extend(cat_places_sorted[:limit])
 
@@ -57,8 +52,15 @@ def nearby_places(request):
             count = UserRoute.objects.filter(user=request.user).count() + 1
             route_name = f"Маршрут №{count}"
 
-        # зберігаємо маршрут у БД
-        route = UserRoute.objects.create(user=request.user, visibility="private", has_start_location=True, start_lat=lat, start_lon=lon, name=route_name)
+        route = UserRoute.objects.create(
+            user=request.user,
+            visibility="private",
+            has_start_location=True,
+            start_lat=lat,
+            start_lon=lon,
+            name=route_name
+        )
+
         for p in result:
             nearest_city = min(City.objects.all(), key=lambda c: haversine(lat, lon, c.lat, c.lon))
             place_obj, _ = Place.objects.get_or_create(
@@ -74,13 +76,14 @@ def nearby_places(request):
                 }
             )
             route.places.add(place_obj)
+
         return JsonResponse({
+            "route_id": route.id,
+            "route_name": route.name,
             "places": result
         })
 
     return render(request, "places/nearby.html")
-
-
 
 @login_required
 def shared_route_view(request, share_uuid):
