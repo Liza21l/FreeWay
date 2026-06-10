@@ -340,7 +340,11 @@ body{
                     <div>
 
                         <div class="route-title">
-                            Маршрут №{{ forloop.counter }}
+                            {% if route.name %}
+                                {{ route.name }}
+                            {% else %}
+                                Маршрут №{{ forloop.counter }}
+                            {% endif %}
                         </div>
 
                         <div class="route-user">
