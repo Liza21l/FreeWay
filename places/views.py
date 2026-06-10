@@ -34,6 +34,7 @@ def nearby_places(request):
         data = json.loads(request.body)
         lat, lon = data["lat"], data["lon"]
         categories = data.get("categories", [])
+        route_name = data.get("route_name", "").strip()
 
         all_places = fetch_places_nearby(lat, lon, categories)
         result = []
@@ -52,8 +53,12 @@ def nearby_places(request):
             limit = 2 if cat in ["museum", "tourist_attraction"] else 1
             result.extend(cat_places_sorted[:limit])
 
+        if not route_name:
+            count = UserRoute.objects.filter(user=request.user).count() + 1
+            route_name = f"Маршрут №{count}"
+
         # зберігаємо маршрут у БД
-        route = UserRoute.objects.create(user=request.user, visibility="private", has_start_location=True, start_lat=lat, start_lon=lon)
+        route = UserRoute.objects.create(user=request.user, visibility="private", has_start_location=True, start_lat=lat, start_lon=lon, name=route_name)
         for p in result:
             nearest_city = min(City.objects.all(), key=lambda c: haversine(lat, lon, c.lat, c.lon))
             place_obj, _ = Place.objects.get_or_create(
@@ -304,7 +309,8 @@ def user_routes_view(request):
             "id": r.id,
             "created_at": r.created_at.strftime("%Y-%m-%d %H:%M"),
             "coords": coords,
-            "has_start_location": r.has_start_location
+            "has_start_location": r.has_start_location,
+            "name": r.name
         })
 
     # параметр open
@@ -371,13 +377,24 @@ def build_route(request):
 
     selected_ids = request.POST.getlist('place_ids')
     visibility = request.POST.get('visibility', 'private') 
+    route_name = request.POST.get('route_name', '').strip()  # нове поле
 
     if not selected_ids:
         return redirect('home')
 
     places = Place.objects.filter(id__in=selected_ids)
 
-    route = UserRoute.objects.create(user=request.user, visibility=visibility, has_start_location=False)
+    # якщо користувач не ввів назву → fallback
+    if not route_name:
+        count = UserRoute.objects.filter(user=request.user).count() + 1
+        route_name = f"Маршрут №{count}"
+
+    route = UserRoute.objects.create(
+        user=request.user,
+        visibility=visibility,
+        has_start_location=False,
+        name=route_name
+    )
     route.places.set(places)
 
     coords = []

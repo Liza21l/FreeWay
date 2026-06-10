@@ -260,6 +260,40 @@ body{
 .leaflet-routing-itinerary{
     display:none !important;
 }
+.route-name-field {
+    margin-bottom: 18px;
+}
+
+.route-name-field label {
+    display:block;
+    font-size:13px;
+    font-weight:600;
+    color:#163867;
+    margin-bottom:6px;
+}
+
+.route-name-field input {
+    width:100%;
+    padding:14px 16px;
+    border:1.5px solid #e2e2e2;
+    border-radius:16px;
+    font-size:15px;
+    outline:none;
+    transition:0.3s;
+    background:#fdfdfd;
+    color:#333;
+}
+
+.route-name-field input::placeholder {
+    color:#aaa;
+    font-size:14px;
+}
+
+.route-name-field input:focus {
+    border-color:#163867;
+    background:#edf4ff;
+}
+
 
 </style>
 </head>
@@ -295,13 +329,15 @@ body{
         </div>
       {% endif %}
 
-
-        <div class="section-title">
-            КАТЕГОРІЇ
-        </div>
-
         <form id="categories-form" method="post" action="{% url 'nearby_places' %}">
             {% csrf_token %}
+            <div class="route-name-field">
+                <label for="routeName">Назва маршруту (необов'язково):</label>
+                <input type="text" id="routeName" name="route_name" placeholder="Наприклад: Прогулянка містом">
+            </div>
+            <div class="section-title">
+                КАТЕГОРІЇ
+            </div>
             <div class="categories-grid">
 
                 <div class="category-card">

@@ -389,6 +389,40 @@ body{
   background:#e2e2e2; /* трохи темніший сірий */
 }
 
+.route-name-field {
+    margin-bottom: 25px;
+}
+
+.route-name-field label {
+    display:block;
+    font-size:14px;
+    font-weight:600;
+    color:#163867;
+    margin-bottom:8px;
+}
+
+.route-name-field input {
+    width:100%;
+    padding:14px 16px;
+    border:1.5px solid #e2e2e2;
+    border-radius:16px;
+    font-size:15px;
+    outline:none;
+    transition:0.3s;
+    background:#fdfdfd;
+    color:#333;
+}
+
+.route-name-field input::placeholder {
+    color:#aaa;
+    font-size:14px;
+}
+
+.route-name-field input:focus {
+    border-color:#163867;
+    background:#edf4ff;
+}
+
 
 
 /* Анімація появи */
@@ -560,6 +594,11 @@ body{
         <button type="button" id="filterBtn" class="filter-btn">
             🔍 Фільтрувати
         </button>
+        <div class="route-name-field">
+            <label for="routeName">Назва маршруту (необов'язково):</label>
+            <input type="text" id="routeName" name="route_name" placeholder="Наприклад: Вечірня прогулянка">
+        </div>
+
 
         <!-- МОДАЛЬНЕ ВІКНО -->
         <div id="filterModal" class="filter-modal" style="display:none;">

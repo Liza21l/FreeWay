@@ -456,7 +456,11 @@ body{
             <div>
 
                 <div class="route-title">
-                    Маршрут №{{ forloop.counter }}
+                    {% if route.name %}
+                        {{ route.name }}
+                    {% else %}
+                        Маршрут №{{ forloop.counter }}
+                    {% endif %}
                 </div>
 
                 <div class="route-date">
@@ -575,8 +579,13 @@ body{
             <div>
 
                 <div class="route-title">
-                    Маршрут №{{ forloop.counter }}
+                    {% if route.name %}
+                        {{ route.name }}
+                    {% else %}
+                        Маршрут №{{ forloop.counter }}
+                    {% endif %}
                 </div>
+
 
                 <div class="route-date">
                     {{ route.created_at|date:"d.m.Y H:i" }}
@@ -852,6 +861,26 @@ document.addEventListener("DOMContentLoaded", () => {
       detailsBlock.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".place-checkbox").forEach(cb => {
+    const key = `route_${cb.dataset.route}_place_${cb.dataset.place}`;
+
+    // Відновлюємо стан при завантаженні
+    if (localStorage.getItem(key) === "checked") {
+      cb.checked = true;
+    }
+
+    // Зберігаємо стан при зміні
+    cb.addEventListener("change", () => {
+      if (cb.checked) {
+        localStorage.setItem(key, "checked");
+      } else {
+        localStorage.removeItem(key);
+      }
+    });
+  });
 });
 </script>
 
