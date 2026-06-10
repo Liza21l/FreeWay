@@ -122,9 +122,6 @@ def shared_route_view(request, share_uuid):
 
 @login_required
 def home_view(request):
-    """
-    Головна сторінка — показує найновіший активний маршрут користувача.
-    """
     latest_route = (
         UserRoute.objects.filter(user=request.user, status='active')
         .prefetch_related('places')
@@ -132,19 +129,14 @@ def home_view(request):
         .first()
     )
 
+    has_active_routes = UserRoute.objects.filter(user=request.user, status='active').exists()
+
     coords = []
     if latest_route:
         coords = [
-            {
-                "lat": p.lat,
-                "lon": p.lon,
-                "name": p.name,
-                "category": p.category,
-            }
+            {"lat": p.lat, "lon": p.lon, "name": p.name, "category": p.category}
             for p in latest_route.places.all()
         ]
-
-        # якщо маршрут має стартову геолокацію → додаємо її як першу точку
         if latest_route.has_start_location and latest_route.start_lat and latest_route.start_lon:
             coords.insert(0, {
                 "lat": latest_route.start_lat,
@@ -156,7 +148,9 @@ def home_view(request):
     return render(request, "places/home.html", {
         "latest_route": latest_route,
         "coords": coords,
+        "has_active_routes": has_active_routes,
     })
+
 
 @login_required
 def archived_routes_view(request):
