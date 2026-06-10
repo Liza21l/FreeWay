@@ -209,6 +209,27 @@ body{
     margin-top:3px;
 }
 
+.change-btn {
+  width:100%;
+  height:54px;
+  background-color:#2ecc71; /* зелений */
+  color:#fff;
+  font-size:15px;
+  font-weight:700;
+  border:none;
+  padding:8px 12px;
+  margin-top:5px;
+  border-radius:16px;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.change-btn:hover {
+  background-color:#27ae60; /* темніший зелений при наведенні */
+}
+
+
+
 .finish-btn{
     width:100%;
     height:54px;
@@ -512,6 +533,13 @@ body{
                     ✗ Видалити маршрут
                 </button>
             </form>
+            <form method="post" action="{% url 'toggle_route_visibility' route.id %}">
+                {% csrf_token %}
+                <button type="submit" class="change-btn">
+                    🔄 Поміняти на публічний
+                </button>
+            </form>
+
 
 
         </div>
@@ -622,6 +650,12 @@ body{
                 {% csrf_token %}
                 <button type="submit" class="delete-btn">
                     ✗ Видалити маршрут
+                </button>
+            </form>
+            <form method="post" action="{% url 'toggle_route_visibility' route.id %}">
+                {% csrf_token %}
+                <button type="submit" class="change-btn">
+                    🔄 Поміняти на особистий
                 </button>
             </form>
 

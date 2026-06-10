@@ -173,6 +173,18 @@
             border-radius:12px;
             font-size:14px;
         }
+        .eye-icon {
+            position: absolute;
+            right: 10px;
+            top: 65%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 18px;
+            color: #666;
+        }
+        .eye-icon:hover {
+            color: #000;
+        }
         /* ---------- ТЕЛЕФОНИ ---------- */
 
         @media (max-width:480px){
@@ -378,14 +390,16 @@
                 {{ form.phone_number }}
             </div>
 
-            <div class="form-group">
+            <div class="form-group" style="position: relative;">
                 <label for="id_password1">Пароль</label>
                 {{ form.password1 }}
+                <span onclick="togglePassword('id_password1')" class="eye-icon">👁️</span>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" style="position: relative;">
                 <label for="id_password2">Підтвердження пароля</label>
                 {{ form.password2 }}
+                <span onclick="togglePassword('id_password2')" class="eye-icon">👁️</span>
             </div>
 
             <button type="submit" class="submit-btn">
@@ -410,6 +424,11 @@
     </div>
 
 </div>
-
+<script>
+function togglePassword(fieldId) {
+    const field = document.getElementById(fieldId);
+    field.type = field.type === "password" ? "text" : "password";
+}
+</script>
 </body>
 </html>

@@ -163,6 +163,18 @@
             text-decoration:none;
             font-weight:600;
         }
+        .eye-icon {
+            position: absolute;
+            right: 10px;          /* відступ від правого краю */
+            top: 50%;             /* по центру по вертикалі */
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 18px;
+            color: #666;
+        }
+        .eye-icon:hover {
+            color: #000;
+        }
         /* ---------- ТЕЛЕФОНИ ---------- */
 
         @media (max-width:480px){
@@ -333,7 +345,10 @@
 
             <div class="form-group">
                 <label for="id_password">Пароль</label>
-                {{ form.password }}
+                <div style="position: relative;">
+                    {{ form.password }}
+                    <span onclick="togglePassword()" class="eye-icon">👁️</span>
+                </div>
             </div>
 
             <button type="submit" class="submit-btn">
@@ -354,6 +369,11 @@
     </div>
 
 </div>
-
+<script>
+function togglePassword() {
+    const field = document.getElementById("id_password");
+    field.type = field.type === "password" ? "text" : "password";
+}
+</script>
 </body>
 </html>

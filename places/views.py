@@ -193,6 +193,18 @@ def toggle_route_status(request, route_id):
         route.status = 'active'
     route.save()
     return redirect('user_routes')
+
+@login_required
+def toggle_route_visibility(request, route_id):
+    route = get_object_or_404(UserRoute, id=route_id, user=request.user)
+    if route.visibility == 'private':
+        route.visibility = 'public'
+    else:
+        route.visibility = 'private'
+    route.save()
+    messages.success(request, "Видимість маршруту змінено.")
+    return redirect('user_routes')
+
 def register(request):
     if request.method == "POST":
         form = CustomUserCreationForm(request.POST)
