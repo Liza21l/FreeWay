@@ -55,6 +55,7 @@ class UserRoute(models.Model):
     ]
 
     user       = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255, blank=True)
     places     = models.ManyToManyField(Place)
     created_at = models.DateTimeField(auto_now_add=True)
     status     = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
