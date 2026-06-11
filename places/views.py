@@ -159,6 +159,33 @@ def home_view(request):
         "has_active_routes": has_active_routes,
     })
 
+@csrf_exempt
+@login_required
+def category_places(request, category):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        lat, lon = data.get("lat"), data.get("lon")
+
+        # твоя функція пошуку місць
+        places = fetch_places_nearby(lat, lon, [category])
+
+        return JsonResponse({"places": places})
+    return JsonResponse({"error": "Invalid method"}, status=405)
+
+@login_required
+def category_all_places(request, category):
+    lat = request.GET.get("lat")
+    lon = request.GET.get("lon")
+
+    if lat and lon:
+        places = fetch_places_nearby(float(lat), float(lon), [category])
+    else:
+        places = Place.objects.filter(category=category)
+
+    return render(request, "places/category_all.html", {
+        "category": category,
+        "places": places
+    })
 
 @login_required
 def archived_routes_view(request):

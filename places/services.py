@@ -78,28 +78,39 @@ def fetch_places(city: City, categories: list):
 
 
 def fetch_places_nearby(lat, lon, categories):
-    api_key = GOOGLE_API_KEY
-    result = []
+    places = []
+    for category in categories:
+        url = (
+            f"https://maps.googleapis.com/maps/api/place/nearbysearch/json"
+            f"?location={lat},{lon}&radius=3000&type={category}&key={GOOGLE_API_KEY}"
+        )
+        response = requests.get(url)
+        data = response.json()
 
-    for cat in categories:
-        url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
-        params = {
-            "location": f"{lat},{lon}",
-            "radius": 3000,   # радіус пошуку у метрах
-            "type": cat,
-            "key": api_key,
-            "opennow": True   # можна додати фільтр "відкрито зараз"
-        }
-        resp = requests.get(url, params=params).json()
-        for el in resp.get("results", []):
-            result.append({
-                "name": el.get("name"),
-                "lat": el["geometry"]["location"]["lat"],
-                "lon": el["geometry"]["location"]["lng"],
-                "category": cat,
-                "address": el.get("vicinity", ""),
-                "rating": el.get("rating"),
-                "is_open": el.get("opening_hours", {}).get("open_now")
+        for result in data.get("results", []):
+            photo_url = None
+            if "photos" in result:
+                photo_ref = result["photos"][0]["photo_reference"]
+                photo_url = (
+                    f"https://maps.googleapis.com/maps/api/place/photo"
+                    f"?maxwidth=400&photo_reference={photo_ref}&key={GOOGLE_API_KEY}"
+                )
+
+            # окремий запит на деталі
+            details_url = (
+                f"https://maps.googleapis.com/maps/api/place/details/json"
+                f"?place_id={result['place_id']}&fields=opening_hours&key={GOOGLE_API_KEY}"
+            )
+            details_resp = requests.get(details_url).json()
+            opening_hours = details_resp.get("result", {}).get("opening_hours", {}).get("weekday_text", [])
+
+            places.append({
+                "id": result["place_id"],
+                "name": result.get("name"),
+                "address": result.get("vicinity"),
+                "rating": result.get("rating"),
+                "is_open": result.get("opening_hours", {}).get("open_now"),
+                "photo_url": photo_url,
+                "opening_hours": opening_hours,   # ← тепер є графік роботи
             })
-    return result
-
+    return places

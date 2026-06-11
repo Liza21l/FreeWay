@@ -352,6 +352,8 @@
 }
 
         .category-card{
+            cursor: pointer;
+            transition: transform 0.2s;
             width:100%;
             background:white;
             border:1.5px solid #ececec;
@@ -359,7 +361,10 @@
             padding:18px;
             min-width:0;
         }
-
+        .category-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
         .category-icon{
             width:56px;
             height:56px;
@@ -380,6 +385,113 @@
             word-break:break-word;
             overflow-wrap:break-word;
         }
+        .places-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 18px;
+            margin-top: 20px;
+        }
+
+        .place-card {
+            background: #fff;
+            border: 1px solid #ececec;
+            border-radius: 22px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+        }
+
+        .place-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .place-card img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+        }
+
+        .place-info {
+            padding: 14px;
+        }
+
+        .place-info h4 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #163867;
+            margin-bottom: 8px;
+        }
+
+        .place-info p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .explore-card{
+
+        display:flex;
+        gap:16px;
+
+        background:white;
+
+        padding:18px;
+
+        border-radius:22px;
+
+        margin-bottom:20px;
+
+        box-shadow:
+            0 3px 12px rgba(0,0,0,.05);
+
+    }
+    
+
+    .explore-content{
+        flex:1;
+    }
+
+    .explore-title{
+
+        color:#163867;
+
+        font-size:18px;
+
+        font-weight:800;
+
+        margin-bottom:6px;
+
+    }
+
+    .explore-text{
+
+        color:#777;
+
+        font-size:20px;
+
+        line-height:1.5;
+
+        margin-bottom:12px;
+
+    }
+
+    .user-location{
+
+        background:#f7f5f2;
+
+        border-radius:14px;
+
+        padding:10px 12px;
+
+        color:#163867;
+
+        font-size:14px;
+
+        font-weight:600;
+
+    }
+
+
         /* МОДАЛЬНЕ ВІКНО */
         #activeModal {
             position:fixed;
@@ -483,6 +595,9 @@
             .container{
                 max-width:430px;
                 border-radius:25px;
+            }
+            .explore-text{
+                font-size:14px;
             }
 
             .hero-title{
@@ -801,15 +916,36 @@
 
         </div>
 
-        <div class="section-title">
-           11 категорій місць
-        </div>
-
         <!-- CATEGORIES -->
 
-        <div class="categories-grid">
+        <div class="places-section">
 
-            <div class="category-card active">
+            <div class="section-title">
+                11 категорій місць
+            </div>
+
+            <div class="explore-card">
+
+                <div class="explore-content">
+
+                    <div class="explore-text">
+                        Оберіть категорію та перегляньте кафе, ресторани,
+                        музеї й інші цікаві місця вашого міста.
+                    </div>
+
+                    <div id="user-location" class="user-location">
+                        Визначаємо ваше місцезнаходження...
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div id="categories-grid" class="categories-grid">
+
+            <div class="category-card active" data-cat="cafe">
 
                 <div class="category-icon">
                     ☕
@@ -821,7 +957,7 @@
 
             </div>
 
-            <div class="category-card">
+            <div class="category-card" data-cat="restaurant">
 
                 <div class="category-icon">
                     🍽️
@@ -833,7 +969,7 @@
 
             </div>
 
-            <div class="category-card">
+            <div class="category-card" data-cat="park">
 
                 <div class="category-icon">
                     🌳
@@ -845,19 +981,19 @@
 
             </div>
 
-            <div class="category-card">
+            <div class="category-card" data-cat="movie_theater">
 
                 <div class="category-icon">
                     🎬
                 </div>
 
-                <div class="category-name">
-                    Кінотеатри
+                <div class="category-name" >
+                    Театри/Кінотеатри
                 </div>
 
             </div>
 
-            <div class="category-card">
+            <div class="category-card" data-cat="museum">
 
                 <div class="category-icon">
                     🏛️
@@ -869,7 +1005,7 @@
 
             </div>
 
-            <div class="category-card">
+            <div class="category-card" data-cat="bar">
 
                 <div class="category-icon">
                     🍹
@@ -881,7 +1017,7 @@
 
             </div>
 
-            <div class="category-card">
+            <div class="category-card" data-cat="meal_takeaway">
 
                 <div class="category-icon">
                     🍔
@@ -893,7 +1029,7 @@
 
             </div>
 
-            <div class="category-card">
+            <div class="category-card" data-cat="supermarket">
 
                 <div class="category-icon">
                     🛒
@@ -904,7 +1040,7 @@
                 </div>
 
             </div>
-            <div class="category-card">
+            <div class="category-card" data-cat="bakery">
 
                 <div class="category-icon">
                     🥐
@@ -915,7 +1051,7 @@
                 </div>
 
             </div>
-            <div class="category-card">
+            <div class="category-card" data-cat="night_club">
 
                 <div class="category-icon">
                     🎵
@@ -926,7 +1062,7 @@
                 </div>
 
             </div>
-            <div class="category-card">
+            <div class="category-card" data-cat="tourist_attraction">
 
                 <div class="category-icon">
                     📍
@@ -939,6 +1075,11 @@
             </div>
 
 
+        </div>
+        <div id="places-block" style="display:none; animation:fadeIn 0.4s ease;">
+            <h3 id="selected-category"></h3>
+            <div id="places-list" class="places-grid"></div>
+            <button id="show-more-btn" class="main-btn">Показати більше</button>
         </div>
 
     </div>
@@ -1079,24 +1220,112 @@
     const modal = document.getElementById("activeModal");
 
     if (modal) {
-    buildBtn.addEventListener("click", function(e){
-        e.preventDefault();
-        modal.style.display = "flex";
-    });
+        buildBtn.addEventListener("click", function(e){
+            e.preventDefault();
+            modal.style.display = "flex";
+        });
 
-    document.getElementById("goToActive").addEventListener("click", () => {
-        window.location.href = "{% url 'user_routes' %}";
-    });
+        document.getElementById("goToActive").addEventListener("click", () => {
+            window.location.href = "{% url 'user_routes' %}";
+        });
 
-    document.getElementById("continueNew").addEventListener("click", () => {
-        window.location.href = buildBtn.getAttribute("href");
-    });
+        document.getElementById("continueNew").addEventListener("click", () => {
+            window.location.href = buildBtn.getAttribute("href");
+        });
 
-    document.getElementById("closeActive").addEventListener("click", () => {
-        modal.style.display = "none";
-    });
+        document.getElementById("closeActive").addEventListener("click", () => {
+            modal.style.display = "none";
+        });
+    }
+    let userLat, userLon;
+    let geoAllowed = false;
+
+    function requestGeolocation() {
+        navigator.geolocation.getCurrentPosition(pos => {
+            userLat = pos.coords.latitude;
+            userLon = pos.coords.longitude;
+            geoAllowed = true;
+
+            fetch(`https://nominatim.openstreetmap.org/reverse?lat=${userLat}&lon=${userLon}&format=json`)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById("user-location").innerHTML = 
+                        `Ваша геолокація: ${data.display_name}`;
+                });
+        }, err => {
+            geoAllowed = false;
+            document.getElementById("user-location").innerHTML = 
+                "Геолокацію не вдалося визначити.";
+        });
     }
 
+    document.addEventListener("DOMContentLoaded", () => {
+        requestGeolocation();
+
+        document.querySelectorAll(".category-card").forEach(card => {
+            card.addEventListener("click", () => {
+                if (!geoAllowed) {
+                    if (confirm("Дозвіл на геолокацію не надано. Хочете дозволити ще раз?")) {
+                        requestGeolocation();
+                    }
+                    return;
+                }
+
+                const category = card.dataset.cat;
+
+                document.getElementById("categories-grid").style.display = "none";
+                document.getElementById("places-block").style.display = "block";
+                document.getElementById("selected-category").textContent = 
+                    "Заклади категорії: " + card.querySelector(".category-name").textContent;
+
+                fetch("/places/category/" + category + "/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    },
+                    body: JSON.stringify({ lat: userLat, lon: userLon })
+                })
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error("HTTP error " + res.status);
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    const list = document.getElementById("places-list");
+                    list.innerHTML = "";
+
+                    data.places.slice(0,3).forEach(p => {
+                        const div = document.createElement("div");
+                        div.className = "place-card";
+                        div.innerHTML = `
+                            <img src="${p.photo_url || '/static/no-photo.png'}" alt="${p.name}">
+                            <div class="place-info">
+                                <h4>${p.name}</h4>
+                                <p>${p.address}</p>
+                                <p>⭐ ${p.rating || '—'}</p>
+                                <p>${p.opening_hours || ''}</p>
+                                <p>${p.is_open ? 'Відчинено' : 'Зачинено'}</p>
+                            </div>
+                        `;
+                        list.appendChild(div);
+                    });
+
+                    document.getElementById("show-more-btn").onclick = () => {
+                        window.location = "/places/category_all/" + category + 
+                            "?lat=" + userLat + "&lon=" + userLon;
+                    };
+                })
+                .catch(err => {
+                    console.error("Помилка:", err);
+                });
+            });
+        });
+    });
+
+
+    
 </script>
 </body>
 </html>
