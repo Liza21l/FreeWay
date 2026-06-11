@@ -1,5 +1,6 @@
 import math, json
-from urllib import request
+import os
+import requests
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
@@ -380,14 +381,13 @@ def build_route(request):
 
     selected_ids = request.POST.getlist('place_ids')
     visibility = request.POST.get('visibility', 'private') 
-    route_name = request.POST.get('route_name', '').strip()  # нове поле
+    route_name = request.POST.get('route_name', '').strip()
 
     if not selected_ids:
         return redirect('home')
 
     places = Place.objects.filter(id__in=selected_ids)
 
-    # якщо користувач не ввів назву → fallback
     if not route_name:
         count = UserRoute.objects.filter(user=request.user).count() + 1
         route_name = f"Маршрут №{count}"
@@ -405,21 +405,17 @@ def build_route(request):
         try:
             p = places.get(id=pid)
             coords.append({
-                'lat':      p.lat,
-                'lon':      p.lon,
-                'name':     p.name,
+                'lat': p.lat,
+                'lon': p.lon,
+                'name': p.name,
                 'category': p.category,
             })
         except Place.DoesNotExist:
             continue
 
-    total_km = 0
-    for i in range(len(coords)-1):
-        p1 = (coords[i]['lat'], coords[i]['lon'])
-        p2 = (coords[i+1]['lat'], coords[i+1]['lon'])
-        total_km += geodesic(p1, p2).km
+    directions_api_key = os.getenv("DIRECTIONS_API_KEY")
 
-    route.distance_km = round(total_km, 2)
-    route.save()
-
-    return render(request, 'places/map.html', {'coords': coords})
+    return render(request, "places/map.html", {
+        "coords": coords,
+        "directions_api_key": directions_api_key
+    })
