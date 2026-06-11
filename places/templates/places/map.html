@@ -129,69 +129,88 @@ body{
 <body>
 <div class="container">
 
-    <a href="{% url 'home' %}" class="back-btn">←</a>
+    <a href="{% url 'home' %}" class="back-btn">
+        ←
+    </a>
 
     <div class="route-card">
-        <div class="route-title">Ваш маршрут</div>
+
+        <div class="route-title">
+            Ваш маршрут
+        </div>
+
         <div class="route-subtitle">
             Маршрут успішно побудовано.
             Нижче відображається карта та інформація про відстань.
         </div>
+
         <div id="info">
-            Відстань: <span id="distance"></span><br>
-            Час: <span id="time"></span>
+            Будуємо маршрут...
         </div>
+
     </div>
 
-    <div id="map" style="height:500px;width:100%;"></div>
+    <div id="map"></div>
 
 </div>
 
 {{ coords|json_script:"coords-data" }}
 
-<!-- ✅ Підключаємо Google Maps JS API -->
-<script src="https://maps.googleapis.com/maps/api/js?key={{ directions_api_key }}&libraries=places"></script>
-
-<script>
+  <script>
     const coords = JSON.parse(document.getElementById('coords-data').textContent);
 
-    const map = new google.maps.Map(document.getElementById("map"), {
-        zoom: 14,
-        center: { lat: coords[0].lat, lng: coords[0].lon }
+    const map = L.map('map').setView([coords[0].lat, coords[0].lon], 14);
+
+    // Тайли OpenStreetMap — карта з вулицями
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    // Кольорові маркери по категоріях
+    const COLORS = { cafe: '#E8793A', restaurant: '#E84A4A', museum: '#4A90E2' };
+
+    coords.forEach((place, i) => {
+      const color = COLORS[place.category] || '#888';
+      const icon = L.divIcon({
+        html: `<div style="
+          background:${color}; color:#fff; border-radius:50%;
+          width:30px; height:30px; display:flex;
+          align-items:center; justify-content:center;
+          font-weight:bold; font-size:14px;
+          border:2px solid #fff; box-shadow:0 2px 5px rgba(0,0,0,.3);
+        ">${i + 1}</div>`,
+        iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -18]
+      });
+      L.marker([place.lat, place.lon], { icon })
+        .bindPopup(`<b>${i + 1}. ${place.name}</b><br>Рейтинг: ${place.rating || '—'}`)
+        .addTo(map);
     });
 
-    const directionsService = new google.maps.DirectionsService();
-    const directionsRenderer = new google.maps.DirectionsRenderer({ map });
+    // Маршрут по вулицях через OSRM
+    if (coords.length > 1) {
+      const control = L.Routing.control({
+        waypoints: coords.map(p => L.latLng(p.lat, p.lon)),
+        router: L.Routing.osrmv1({
+          serviceUrl: 'https://router.project-osrm.org/route/v1',
+          profile: 'foot',   // пішки. 'driving' або 'cycling' теж працює
+        }),
+        lineOptions: {
+          styles: [{ color: '#4A90E2', weight: 5, opacity: 0.85 }]
+        },
+        createMarker: () => null,  // прибираємо дублікати маркерів
+        show: false,               // ховаємо панель покрокових інструкцій
+      }).addTo(map);
 
-    const waypoints = coords.slice(1, coords.length-1).map(p => ({
-        location: { lat: p.lat, lng: p.lon },
-        stopover: true
-    }));
-
-    directionsService.route({
-        origin: { lat: coords[0].lat, lng: coords[0].lon },
-        destination: { lat: coords[coords.length-1].lat, lng: coords[coords.length-1].lon },
-        waypoints: waypoints,
-        travelMode: google.maps.TravelMode.WALKING,
-        optimizeWaypoints: true
-    }, (result, status) => {
-        if (status === "OK") {
-            directionsRenderer.setDirections(result);
-
-            let distance = 0, duration = 0;
-            result.routes[0].legs.forEach(leg => {
-                distance += leg.distance.value;
-                duration += leg.duration.value;
-            });
-
-            document.getElementById("distance").innerHTML = (distance/1000).toFixed(1) + " км";
-            document.getElementById("time").innerHTML = Math.round(duration/60) + " хв";
-        } else {
-            console.error("Directions request failed:", status);
-        }
-    });
+      // Виводимо відстань і час після побудови
+      control.on('routesfound', (e) => {
+        const r   = e.routes[0];
+        const km  = (r.summary.totalDistance / 1000).toFixed(2);
+        const min = Math.round(r.summary.totalTime / 60);
+        document.getElementById('info').innerHTML =
+          `Маршрут по вулицях: <b>${km} км</b> | Час пішки: <b>~${min} хв</b>`;
+      });
+    }
 </script>
-</body>
-</html>
 
+</body>
 </html>
