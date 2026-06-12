@@ -165,12 +165,11 @@
         }
         .eye-icon {
             position: absolute;
-            right: 10px;          /* відступ від правого краю */
-            top: 50%;             /* по центру по вертикалі */
+            right: 10px;
+            top: 50%;
             transform: translateY(-50%);
             cursor: pointer;
-            font-size: 18px;
-            color: #666;
+            color: #555;
         }
         .eye-icon:hover {
             color: #000;
@@ -178,6 +177,7 @@
         /* ---------- ТЕЛЕФОНИ ---------- */
 
         @media (max-width:480px){
+            
 
             .auth-container{
                 padding:20px 12px;
@@ -347,7 +347,15 @@
                 <label for="id_password">Пароль</label>
                 <div style="position: relative;">
                     {{ form.password }}
-                    <span onclick="togglePassword()" class="eye-icon">👁️</span>
+                    <span onclick="togglePassword()" class="eye-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" 
+                            width="20" height="20" fill="none" 
+                            stroke="currentColor" stroke-width="2" 
+                            viewBox="0 0 24 24">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                    </span>
                 </div>
             </div>
 
