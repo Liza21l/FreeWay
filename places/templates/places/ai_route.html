@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+
+    <title>AI Route</title>
+</head>
+<body>
+<form id="ai-route-form" method="post" action="{% url 'ai_route' %}">
+    {% csrf_token %}
+    <div class="route-name-field">
+        <label for="aiRouteName">Назва маршруту:</label>
+        <input type="text" id="aiRouteName" name="route_name" placeholder="Наприклад: Прогулянка з ШІ">
+    </div>
+
+    <div class="route-city-field">
+        <label for="aiCity">Місто:</label>
+        <select id="aiCity" name="city">
+            {% for city in cities %}
+                <option value="{{ city.name }}">{{ city.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="route-visibility-field">
+        <label for="aiVisibility">Видимість:</label>
+        <select id="aiVisibility" name="visibility">
+            <option value="private">Особистий</option>
+            <option value="public">Публічний</option>
+        </select>
+    </div>
+
+    <div class="section-title">КАТЕГОРІЇ</div>
+    <div class="categories-grid">
+        <label><input type="checkbox" name="categories" value="restaurant"> 🍽 Ресторани</label>
+        <label><input type="checkbox" name="categories" value="cafe"> ☕ Кафе</label>
+        <label><input type="checkbox" name="categories" value="museum"> 🏛 Музеї</label>
+        <label><input type="checkbox" name="categories" value="park"> 🌳 Парки</label>
+        <label><input type="checkbox" name="categories" value="meal_takeaway">🍔 Фастфуд</label>
+        <label><input type="checkbox" name="categories" value="bar">🍹 Бари</label>
+        <label><input type="checkbox" name="categories" value="supermarket"> 🛒Супермаркети</label>
+        <label><input type="checkbox" name="categories" value="night_club"> 🎵Нічні клуби</label>
+        <label><input type="checkbox" name="categories" value="bakery"> 🥐Пекарні</label>
+        <label><input type="checkbox" name="categories" value="movie_theater"> 🎬Кінотеатри/Театри</label>
+        <label><input type="checkbox" name="categories" value="tourist_attraction"> 📍Пам'ятки</label>
+    </div>
+
+    <button type="submit" class="find-btn">Побудувати маршрут з ШІ</button>
+</form>
+
+<div id="ai-routes-result"></div>
+
+<script>
+document.getElementById("ai-route-form").addEventListener("submit", function(e){
+    e.preventDefault();
+
+    const routeName = document.getElementById("aiRouteName").value;
+    const city = document.getElementById("aiCity").value;
+    const visibility = document.getElementById("aiVisibility").value;
+    const categories = [...document.querySelectorAll("#ai-route-form input[name='categories']:checked")].map(c => c.value);
+
+    const block = document.getElementById("ai-routes-result");
+    block.innerHTML = "<p>Маршрут будується...</p>";
+
+    document.getElementById("ai-route-form").style.display = "none";
+
+    fetch("{% url 'ai_route' %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify({ route_name: routeName, city, categories, visibility })
+    })
+    .then(res => res.json())
+    .then(data => {
+        block.innerHTML = "";
+
+        // 🔎 нормалізація: перетворюємо у масив масивів
+        let routes = [];
+        if (Array.isArray(data.routes)) {
+            if (data.routes.length === 1 && typeof data.routes[0] === "object" && !Array.isArray(data.routes[0])) {
+                routes = Object.values(data.routes[0]); // [{route1: [...], route2: [...]}]
+            } else {
+                routes = data.routes.filter(r => Array.isArray(r));
+            }
+        } else if (typeof data.routes === "object" && data.routes !== null) {
+            routes = Object.values(data.routes);
+        }
+
+        console.log("Normalized routes:", routes);
+
+        if (Array.isArray(routes)) {
+            routes.forEach((route, i) => {
+                if (!Array.isArray(route)) {
+                    console.error("route is not an array", route);
+                    return;
+                }
+
+                const div = document.createElement("div");
+                div.className = "route-card";
+                div.innerHTML = `
+                    <h4>Варіант ${i+1}</h4>
+                    <label>
+                        <input type="radio" name="selectedRoute" value="${i}">
+                        Обрати цей маршрут
+                    </label>
+                    <ul>
+                        ${route.map(p => `<li>${p.name || '—'} (${p.category || '—'}) ⭐ ${p.rating || '—'}</li>`).join("")}
+                    </ul>
+                    <div id="map-${i}" style="height:300px; margin-top:10px;"></div>
+                    <div id="info-${i}"></div>
+                `;
+                block.appendChild(div);
+
+                if (route.length > 0 && route[0].lat && route[0].lon) {
+                    const map = L.map(`map-${i}`).setView([route[0].lat, route[0].lon], 14);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                      attribution: '© OpenStreetMap'
+                    }).addTo(map);
+
+                    route.forEach((place, idx) => {
+                      if (place.lat && place.lon) {
+                        L.marker([place.lat, place.lon])
+                          .bindPopup(`<b>${idx+1}. ${place.name || '—'}</b><br>Рейтинг: ${place.rating || '—'}`)
+                          .addTo(map);
+                      }
+                    });
+
+                    // ✅ малюємо маршрут (лінію між точками)
+                    if (route.length > 1) {
+                        const control = L.Routing.control({
+                            waypoints: route.map(p => L.latLng(p.lat, p.lon)),
+                            router: L.Routing.osrmv1({
+                                serviceUrl: 'https://router.project-osrm.org/route/v1',
+                                profile: 'foot',
+                            }),
+                            lineOptions: {
+                                styles: [{ color: '#4A90E2', weight: 5, opacity: 0.85 }]
+                            },
+                            createMarker: () => null,
+                            show: false,
+                        }).addTo(map);
+
+                        control.on('routesfound', (e) => {
+                            const r   = e.routes[0];
+                            const km  = (r.summary.totalDistance / 1000).toFixed(2);
+                            const min = Math.round(r.summary.totalTime / 60);
+                            document.getElementById(`info-${i}`).innerHTML =
+                              `Маршрут: <b>${km} км</b> | Час пішки: <b>~${min} хв</b>`;
+                        });
+                    }
+                }
+            });
+
+            // кнопка для збереження
+            const saveBtn = document.createElement("button");
+            saveBtn.textContent = "Зберегти вибраний маршрут";
+            saveBtn.className = "find-btn";
+            saveBtn.onclick = () => {
+                const selectedIndex = document.querySelector("input[name='selectedRoute']:checked");
+                if (!selectedIndex) {
+                    alert("Оберіть один маршрут!");
+                    return;
+                }
+                const selectedRoute = routes[selectedIndex.value];
+
+                fetch("{% url 'save_ai_route' %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    },
+                    body: JSON.stringify({ 
+                        route_name: routeName, 
+                        city, 
+                        visibility, 
+                        places: selectedRoute 
+                    })
+                })
+                .then(res => res.json())
+                .then(resp => {
+                    alert("Маршрут збережено! ID: " + resp.route_id);
+                });
+            };
+            block.appendChild(saveBtn);
+
+        } else {
+            block.innerHTML = "<p>Помилка: сервер повернув некоректні дані.</p>";
+            console.error("routes is not an array", data.routes);
+        }
+    });
+});
+</script>
+
+</body>
+</html>

@@ -23,5 +23,7 @@ urlpatterns = [
     path("routes/<int:route_id>/toggle_visibility/", views.toggle_route_visibility, name="toggle_route_visibility"),
     path("places/category/<str:category>/", views.category_places, name="category_places"),
     path("places/category_all/<str:category>/", views.category_all_places, name="category_all_places"),
-
+    # path("ai_route/", views.ai_route, name="ai_route"),
+    # path("save_ai_route/", views.save_ai_route, name="save_ai_route"),
+    # path("ai_route_page/", views.ai_route_page, name="ai_route_page"),
 ]
