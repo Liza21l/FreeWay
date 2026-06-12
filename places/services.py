@@ -106,11 +106,14 @@ def fetch_places_nearby(lat, lon, categories):
 
             places.append({
                 "id": result["place_id"],
+                "lat": result["geometry"]["location"]["lat"], 
+                "lon": result["geometry"]["location"]["lng"],
                 "name": result.get("name"),
                 "address": result.get("vicinity"),
                 "rating": result.get("rating"),
                 "is_open": result.get("opening_hours", {}).get("open_now"),
                 "photo_url": photo_url,
                 "opening_hours": opening_hours,   # ← тепер є графік роботи
+                "category": category
             })
     return places
