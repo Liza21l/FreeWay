@@ -3,7 +3,7 @@ import os
 import json
 from typing import List
 from pydantic import BaseModel, Field, ValidationError
-import google.generativeai as genai
+from google.genai import Client
 from json_repair import repair_json
 
 
@@ -92,7 +92,7 @@ def nearby_places(request):
 
     return render(request, "places/nearby.html")
 
-genai.configure(api_key=os.getenv("ai_key"))
+client = Client(api_key=os.getenv("ai_key"))
 
 class PlaceSchema(BaseModel):
     name: str
@@ -113,15 +113,9 @@ def call_ai_model(prompt: str) -> dict | None:
     Викликає ШІ та валідує відповідь за схемою JSON.
     Повертає Python-словник у разі успіху або None, якщо сталася помилка.
     """
-    model = genai.GenerativeModel(
-        model_name="gemini-2.5-flash",
-        generation_config={
-            "response_mime_type": "application/json"
-        }
-    )
-
-    response = model.generate_content(
-        f"""
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=f"""
         Ти допомагаєш будувати туристичні маршрути.
         ПОВЕРТАЙ ТІЛЬКИ ВАЛІДНИЙ JSON В ОЧІКУВАНОМУ ФОРМАТІ.
 
@@ -146,7 +140,42 @@ def call_ai_model(prompt: str) -> dict | None:
 
         {prompt}
         """
+        
     )
+    # model = client.models.generate_content(
+    #     model_name="gemini-2.5-flash",
+    #     generation_config={
+    #         "response_mime_type": "application/json"
+    #     }
+    # )
+
+    # response = model.generate_content(
+    #     f"""
+    #     Ти допомагаєш будувати туристичні маршрути.
+    #     ПОВЕРТАЙ ТІЛЬКИ ВАЛІДНИЙ JSON В ОЧІКУВАНОМУ ФОРМАТІ.
+
+    #     Формат відповіді:
+    #     {{
+    #       "routes": [
+    #         {{
+    #           "name": "Маршрут 1",
+    #           "places": [
+    #             {{
+    #               "name": "Назва",
+    #               "address": "Адреса",
+    #               "lat": 0.0,
+    #               "lon": 0.0,
+    #               "rating": 0.0,
+    #               "category": "Категорія"
+    #             }}
+    #           ]
+    #         }}
+    #       ]
+    #     }}
+
+    #     {prompt}
+    #     """
+    # )
     print("AI Response:", response.text[0:15])  # Логування для розробника
 
     # Спочатку пробуємо розпарсити базовий JSON
