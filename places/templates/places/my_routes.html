@@ -417,7 +417,6 @@ body{
     {% for message in messages %}
       <div class="alert {{ message.tags }}">
         {{ message }}
-        <button type="button" class="close-btn" onclick="this.parentElement.style.display='none'">×</button>
       </div>
     {% endfor %}
   </div>
@@ -838,7 +837,7 @@ routes.forEach(route => {
         control.on("routesfound", e => {
             const r = e.routes[0];
             const km = (r.summary.totalDistance / 1000).toFixed(2);
-            const min = Math.round(r.summary.totalTime / 60);
+            const min = Math.round(r.summary.totalTime / 7);
             document.getElementById(`info-${route.id}`).innerHTML =
                 `📍 ${km} км • 🚶 ~${min} хв`;
         });
@@ -880,6 +879,19 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.removeItem(key);
       }
     });
+  });
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  // знаходимо всі повідомлення
+  const alerts = document.querySelectorAll(".messages .alert");
+  alerts.forEach(alert => {
+    // через 2 секунди плавно приховуємо
+    setTimeout(() => {
+      alert.style.transition = "opacity 0.5s ease";
+      alert.style.opacity = "0";
+      setTimeout(() => alert.remove(), 500); // видаляємо після анімації
+    }, 2000);
   });
 });
 </script>

@@ -1177,7 +1177,7 @@
         control.on('routesfound', (e) => {
             const r = e.routes[0];
             const km = (r.summary.totalDistance / 1000).toFixed(1);
-            const min = Math.round(r.summary.totalTime / 60);
+            const min = Math.round(r.summary.totalTime / 7);
             document.getElementById('distance').innerHTML = km + " км";
             document.getElementById('time').innerHTML = min + " хв";
         });

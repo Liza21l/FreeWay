@@ -205,7 +205,7 @@ body{
       control.on('routesfound', (e) => {
         const r   = e.routes[0];
         const km  = (r.summary.totalDistance / 1000).toFixed(2);
-        const min = Math.round(r.summary.totalTime / 60);
+        const min = Math.round(r.summary.totalTime / 7);
         document.getElementById('info').innerHTML =
           `Маршрут по вулицях: <b>${km} км</b> | Час пішки: <b>~${min} хв</b>`;
       });

@@ -1,7 +1,9 @@
 import math, json
-# import os
-# import re
-# from groq import Groq
+import os
+import json
+import google.generativeai as genai
+from json_repair import repair_json
+
 
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect, get_object_or_404
@@ -88,172 +90,162 @@ def nearby_places(request):
 
     return render(request, "places/nearby.html")
 
-# def call_ai_model(prompt):
-#     api_key = os.getenv("ai_key")
-#     if not api_key:
-#         raise ValueError("Groq API key not found in environment variable 'ai_key'")
+genai.configure(api_key=os.getenv("ai_key"))
 
-#     client = Groq(api_key=api_key)
+def call_ai_model(prompt):
+    model = genai.GenerativeModel(
+        model_name="gemini-2.5-flash",
+        generation_config={
+            "response_mime_type": "application/json"
+        }
+    )
 
-#     response = client.chat.completions.create(
-#         model="llama-3.1-8b-instant",
-#         messages=[
-#             {"role": "system", "content": "Ти допомагаєш будувати туристичні маршрути."},
-#             {"role": "user", "content": prompt}
-#         ]
-#     )
+    response = model.generate_content(
+        f"""
+        Ти допомагаєш будувати туристичні маршрути.
 
-#     response_text = response.choices[0].message.content.strip()
+        ПОВЕРТАЙ ТІЛЬКИ ВАЛІДНИЙ JSON.
 
-#     # Очистка від Markdown-блоків
-#     if response_text.startswith("```"):
-#         response_text = response_text.strip("`")
-#         if response_text.lower().startswith("json"):
-#             response_text = response_text[4:].strip()
+        Формат відповіді:
 
-#     print("AI raw text:", response_text)
+        {{
+          "routes": [
+            {{
+              "name": "Маршрут 1",
+              "places": [
+                {{
+                  "name": "",
+                  "address": "",
+                  "lat": 0,
+                  "lon": 0,
+                  "rating": 0,
+                  "category": ""
+                }}
+              ]
+            }}
+          ]
+        }}
 
-#     import re
-#     try:
-#         parsed = json.loads(response_text)
-#     except Exception as e:
-#         print("JSON parse error:", e)
-#         matches = re.findall(r"\[.*?\]", response_text, re.S)
-#         if matches:
-#             parsed = []
-#             for m in matches:
-#                 try:
-#                     parsed.append(json.loads(m))
-#                 except Exception as inner_e:
-#                     print("Regex parse error:", inner_e)
-#         else:
-#             parsed = [[{
-#                 "name": "Невідоме місце",
-#                 "address": "-",
-#                 "lat": 50.45,
-#                 "lon": 30.52,
-#                 "rating": 0,
-#                 "category": "unknown"
-#             }]]
+        {prompt}
+        """
+    )
 
-#     # 🔎 універсальна нормалізація → завжди масив масивів
-#     routes = []
-#     if isinstance(parsed, dict):
-#         routes = list(parsed.values())
-#     elif isinstance(parsed, list):
-#         parsed = [item for item in parsed if item != {}]
-#         if len(parsed) == 1 and isinstance(parsed[0], dict):
-#             routes = list(parsed[0].values())
-#         elif len(parsed) == 1 and isinstance(parsed[0], list):
-#             routes = parsed[0]
-#         elif all(isinstance(r, list) for r in parsed):
-#             routes = parsed
-#         elif all(isinstance(r, dict) for r in parsed):
-#             routes = [parsed]
+    try:
+        return json.loads(response.text)
 
-#     if not routes or not any(routes):
-#         routes = [[{
-#             "name": "Невідоме місце",
-#             "address": "-",
-#             "lat": 50.45,
-#             "lon": 30.52,
-#             "rating": 0,
-#             "category": "unknown"
-#         }]]
-
-#     return routes
+    except Exception:
+        repaired = repair_json(response.text)
+        return json.loads(repaired)
 
 
 
-# @csrf_exempt
-# @login_required
-# def ai_route(request):
-#     if request.method == "POST":
-#         data = json.loads(request.body)
-#         route_name = data.get("route_name", "AI Маршрут")
-#         city_name = data["city"]
-#         categories = data.get("categories", [])
-#         visibility = data.get("visibility", "private")
 
-#         city = City.objects.get(name=city_name)
+@login_required
+def ai_route(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        route_name = data.get("route_name", "AI Маршрут")
+        city_name = data["city"]
+        categories = data.get("categories", [])
+        visibility = data.get("visibility", "private")
 
-#         prompt = (
-#             f"Згенеруй рівно 4 маршрути у місті {city_name}. "
-#             f"Кожен маршрут має містити 6-7 місць лише з категорій: {', '.join(categories)}. "
-#             f"Кожне місце повинно мати поля: name, address, lat, lon, rating, category. "
-#             f"Відповідь строго у форматі чистого JSON масиву масивів без пояснень. "
-#             f"Не використовуй Markdown, не додавай ```json або ```."
-#         )
+        city = City.objects.get(name=city_name)
 
-#         ai_response = call_ai_model(prompt)
-#         print("AI raw response:", ai_response)
+        prompt = f"""
+            Знайди реальні туристичні місця у місті {city_name}.
 
-#         return JsonResponse({
-#             "routes": ai_response,
-#             "route_name": route_name,
-#             "city": city_name,
-#             "visibility": visibility
-#         })
-#     return JsonResponse({"error": "Invalid method"}, status=405)
+            Категорії:
+            {', '.join(categories)}
+
+            Створи від 3 до 4 маршрутів.
+
+            Для кожного маршруту:
+            - придумай назву
+            - 5-10 місць
+            - місця повинні бути логічно згруповані
+            - використовуй тільки реальні місця
+
+            Для кожного місця поверни:
+
+            name
+            address
+            lat
+            lon
+            rating
+            category
+
+            Не додавай пояснень.
+            Поверни лише JSON.
+        """
+
+        ai_response = call_ai_model(prompt)
+
+        return JsonResponse({
+            "routes": ai_response["routes"],
+            "route_name": route_name,
+            "city": city_name,
+            "visibility": visibility
+        })
+    return JsonResponse({"error": "Invalid method"}, status=405)
 
 
-# @csrf_exempt
-# @login_required
-# def save_ai_route(request):
-#     if request.method == "POST":
-#         data = json.loads(request.body)
-#         route_name = data.get("route_name", "AI Маршрут")
-#         city_name = data["city"]
-#         visibility = data.get("visibility", "private")
-#         places = data.get("places", [])
 
-#         city = City.objects.get(name=city_name)
+@login_required
+def save_ai_route(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        route_name = data.get("route_name", "AI Маршрут")
+        city_name = data["city"]
+        visibility = data.get("visibility", "private")
+        places = data.get("places", [])
 
-#         route = UserRoute.objects.create(
-#             user=request.user,
-#             visibility=visibility,
-#             has_start_location=False,
-#             name=route_name
-#         )
+        city = City.objects.get(name=city_name)
 
-#         normalized_places = []
-#         for p in places:
-#             normalized_places.append({
-#                 "name": p.get("name") or p.get("назва"),
-#                 "address": p.get("address") or p.get("адреса", "-"),
-#                 "lat": p.get("lat"),
-#                 "lon": p.get("lon"),
-#                 "rating": p.get("rating", 0),
-#                 "category": p.get("category") or p.get("тип")
-#             })
+        route = UserRoute.objects.create(
+            user=request.user,
+            visibility=visibility,
+            has_start_location=False,
+            name=route_name
+        )
 
-#         for p in normalized_places:
-#             place_obj, _ = Place.objects.update_or_create(
-#                 city=city,
-#                 name=p["name"],
-#                 lat=p["lat"],
-#                 lon=p["lon"],
-#                 category=p["category"],
-#                 defaults={
-#                     "address": p.get("address"),
-#                     "rating": p.get("rating"),
-#                 }
-#             )
-#             route.places.add(place_obj)
+        normalized_places = []
+        for p in places:
+            normalized_places.append({
+                "name": p.get("name") or p.get("назва"),
+                "address": p.get("address") or p.get("адреса", "-"),
+                "lat": p.get("lat"),
+                "lon": p.get("lon"),
+                "rating": p.get("rating", 0),
+                "category": p.get("category") or p.get("тип")
+            })
+
+        for p in normalized_places:
+            place_obj, _ = Place.objects.update_or_create(
+                city=city,
+                name=p["name"],
+                lat=p["lat"],
+                lon=p["lon"],
+                category=p["category"],
+                defaults={
+                    "address": p.get("address"),
+                    "rating": p.get("rating"),
+                }
+            )
+            route.places.add(place_obj)
             
 
-#         return JsonResponse({
-#             "route_id": route.id,
-#             "route_name": route.name,
-#             "created_at": route.created_at.strftime("%d.%m.%Y %H:%M")
-#         })
-#     return JsonResponse({"error": "Invalid method"}, status=405)
+        return JsonResponse({
+            "route_id": route.id,
+            "route_name": route.name,
+            "created_at": route.created_at.strftime("%d.%m.%Y %H:%M")
+        })
+    return JsonResponse({"error": "Invalid method"}, status=405)
 
 
-# @login_required
-# def ai_route_page(request):
-#     cities = City.objects.all()
-#     return render(request, "places/ai_route.html", {"cities": cities})
+@login_required
+def ai_route_page(request):
+    cities = City.objects.all()
+    return render(request, "places/ai_route.html", {"cities": cities})
 
 @login_required
 def shared_route_view(request, share_uuid):
