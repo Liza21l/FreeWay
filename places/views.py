@@ -147,6 +147,7 @@ def call_ai_model(prompt: str) -> dict | None:
         {prompt}
         """
     )
+    print("AI Response:", response.text[0:15])  # Логування для розробника
 
     # Спочатку пробуємо розпарсити базовий JSON
     try:
