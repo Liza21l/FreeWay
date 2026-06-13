@@ -1,11 +1,12 @@
 import math, json
 import os
 import json
+import requests
 from typing import List
 from pydantic import BaseModel, Field, ValidationError
 from google.genai import Client
 from json_repair import repair_json
-
+from urllib.parse import quote
 
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect, get_object_or_404
@@ -92,7 +93,67 @@ def nearby_places(request):
 
     return render(request, "places/nearby.html")
 
-client = Client(api_key=os.getenv("ai_key"))
+
+def call_bedrock_model(prompt):
+    API_KEY = os.getenv("ai_key")
+    REGION = "us-east-1"
+    model_id = "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+    model_id_encoded = quote(model_id, safe="")
+
+    system_prompt = """
+    Ти допомагаєш будувати туристичні маршрути.
+    ПОВЕРТАЙ ТІЛЬКИ ВАЛІДНИЙ JSON В ОЧІКУВАНОМУ ФОРМАТІ.
+
+    Формат відповіді:
+    {
+    "routes": [
+        {
+        "name": "Маршрут 1",
+        "places": [
+            {
+            "name": "Назва",
+            "address": "Адреса",
+            "lat": 0.0,
+            "lon": 0.0,
+            "rating": 0.0,
+            "category": "Категорія"
+            }
+        ]
+        }
+    ]
+    }
+    """
+
+    url = f"https://bedrock-runtime.{REGION}.amazonaws.com/model/{model_id_encoded}/invoke"
+
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type": "application/json"
+    }
+
+    body = {
+        "anthropic_version": "bedrock-2023-05-31",
+        "max_tokens": 4096,
+        "system": system_prompt,
+        "messages": [
+            {
+                "role": "user",
+                "content": [{"type": "text", "text": prompt}]  # type field required
+            }
+        ],
+        "temperature": 0.2
+    }
+
+    response = requests.post(url, headers=headers, json=body)
+    print(response.status_code)
+    print(response.text)  # actual error from AWS
+    response.raise_for_status()
+    result = response.json()
+    print(response.json())
+
+    return result["content"][0]["text"]
+
+
 
 class PlaceSchema(BaseModel):
     name: str
@@ -113,35 +174,84 @@ def call_ai_model(prompt: str) -> dict | None:
     Викликає ШІ та валідує відповідь за схемою JSON.
     Повертає Python-словник у разі успіху або None, якщо сталася помилка.
     """
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=f"""
-        Ти допомагаєш будувати туристичні маршрути.
-        ПОВЕРТАЙ ТІЛЬКИ ВАЛІДНИЙ JSON В ОЧІКУВАНОМУ ФОРМАТІ.
+    # client = boto3.client(service_name="bedrock-runtime", region_name="us-east-1")
 
-        Формат відповіді:
-        {{
-          "routes": [
-            {{
-              "name": "Маршрут 1",
-              "places": [
-                {{
-                  "name": "Назва",
-                  "address": "Адреса",
-                  "lat": 0.0,
-                  "lon": 0.0,
-                  "rating": 0.0,
-                  "category": "Категорія"
-                }}
-              ]
-            }}
-          ]
-        }}
+    # # Define the target Bedrock model (e.g., Amazon Nova Micro, Anthropic Claude 3.5 Sonnet, etc.)
+    # model_id = "amazon.nova-micro-v1:0" 
 
-        {prompt}
-        """
+    # # Combine the system prompt and user intent
+    # system_prompt = """
+    # Ти допомагаєш будувати туристичні маршрути.
+    # ПОВЕРТАЙ ТІЛЬКИ ВАЛІДНИЙ JSON В ОЧІКУВАНОМУ ФОРМАТІ.
+
+    # Формат відповіді:
+    # {
+    # "routes": [
+    #     {
+    #     "name": "Маршрут 1",
+    #     "places": [
+    #         {
+    #         "name": "Назва",
+    #         "address": "Адреса",
+    #         "lat": 0.0,
+    #         "lon": 0.0,
+    #         "rating": 0.0,
+    #         "category": "Категорія"
+    #         }
+    #     ]
+    #     }
+    # ]
+    # }
+    # """
+
+    # # Execute the native Bedrock API call
+    # response = client.converse(
+    #     modelId=model_id,
+    #     messages=[
+    #         {
+    #             "role": "user",
+    #             "content": [{"text": prompt}]
+    #         }
+    #     ],
+    #     system=[
+    #         {"text": system_prompt}
+    #     ],
+    #     inferenceConfig={
+    #         "temperature": 0.2, # Low temperature helps stick to JSON formats
+    #     }
+    # )
+    response = call_bedrock_model(prompt=prompt)
+    print("Raw AI Response:", response)  # Логування для розробника
+    
+    # response = client.models.generate_content(
+    #     model="gemini-2.5-flash",
+    #     contents=f"""
+    #     Ти допомагаєш будувати туристичні маршрути.
+    #     ПОВЕРТАЙ ТІЛЬКИ ВАЛІДНИЙ JSON В ОЧІКУВАНОМУ ФОРМАТІ.
+
+    #     Формат відповіді:
+    #     {{
+    #       "routes": [
+    #         {{
+    #           "name": "Маршрут 1",
+    #           "places": [
+    #             {{
+    #               "name": "Назва",
+    #               "address": "Адреса",
+    #               "lat": 0.0,
+    #               "lon": 0.0,
+    #               "rating": 0.0,
+    #               "category": "Категорія"
+    #             }}
+    #           ]
+    #         }}
+    #       ]
+    #     }}
+
+    #     {prompt}
+    #     """
         
-    )
+    # )
     # model = client.models.generate_content(
     #     model_name="gemini-2.5-flash",
     #     generation_config={
@@ -176,15 +286,29 @@ def call_ai_model(prompt: str) -> dict | None:
     #     {prompt}
     #     """
     # )
-    print("AI Response:", response.text[0:15])  # Логування для розробника
 
     # Спочатку пробуємо розпарсити базовий JSON
-    try:
-        raw_json = json.loads(response.text)
-    except Exception:
+    # try:
+    #     raw_json = json.loads(response.routes)
+    # except Exception:
         
-        try: 
-            repaired = repair_json(response.text)
+    #     try: 
+    #         repaired = repair_json(response.routes)
+    #         raw_json = json.loads(repaired)
+    #     except Exception:
+    #         return None
+    clean = response.strip()
+    if clean.startswith("```"):
+        clean = clean.split("\n", 1)[1]  # remove first line (```json)
+    if clean.endswith("```"):
+        clean = clean.rsplit("```", 1)[0]  # remove trailing ```
+    clean = clean.strip()
+
+    try:
+        raw_json = json.loads(clean)
+    except Exception:
+        try:
+            repaired = repair_json(clean)
             raw_json = json.loads(repaired)
         except Exception:
             return None
