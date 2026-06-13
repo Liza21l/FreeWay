@@ -1,6 +1,8 @@
 import math, json
 import os
 import json
+from typing import List
+from pydantic import BaseModel, Field, ValidationError
 import google.generativeai as genai
 from json_repair import repair_json
 
@@ -92,7 +94,25 @@ def nearby_places(request):
 
 genai.configure(api_key=os.getenv("ai_key"))
 
-def call_ai_model(prompt):
+class PlaceSchema(BaseModel):
+    name: str
+    address: str
+    lat: float
+    lon: float
+    rating: float
+    category: str
+
+class RouteSchema(BaseModel):
+    name: str
+    places: List[PlaceSchema]
+
+class RouteResponseSchema(BaseModel):
+    routes: List[RouteSchema]
+def call_ai_model(prompt: str) -> dict | None:
+    """
+    Викликає ШІ та валідує відповідь за схемою JSON.
+    Повертає Python-словник у разі успіху або None, якщо сталася помилка.
+    """
     model = genai.GenerativeModel(
         model_name="gemini-2.5-flash",
         generation_config={
@@ -103,23 +123,21 @@ def call_ai_model(prompt):
     response = model.generate_content(
         f"""
         Ти допомагаєш будувати туристичні маршрути.
-
-        ПОВЕРТАЙ ТІЛЬКИ ВАЛІДНИЙ JSON.
+        ПОВЕРТАЙ ТІЛЬКИ ВАЛІДНИЙ JSON В ОЧІКУВАНОМУ ФОРМАТІ.
 
         Формат відповіді:
-
         {{
           "routes": [
             {{
               "name": "Маршрут 1",
               "places": [
                 {{
-                  "name": "",
-                  "address": "",
-                  "lat": 0,
-                  "lon": 0,
-                  "rating": 0,
-                  "category": ""
+                  "name": "Назва",
+                  "address": "Адреса",
+                  "lat": 0.0,
+                  "lon": 0.0,
+                  "rating": 0.0,
+                  "category": "Категорія"
                 }}
               ]
             }}
@@ -130,26 +148,51 @@ def call_ai_model(prompt):
         """
     )
 
+    # Спочатку пробуємо розпарсити базовий JSON
     try:
-        return json.loads(response.text)
-
+        raw_json = json.loads(response.text)
     except Exception:
-        repaired = repair_json(response.text)
-        return json.loads(repaired)
+        
+        try: 
+            repaired = repair_json(response.text)
+            raw_json = json.loads(repaired)
+        except Exception:
+            return None
+
+    # Тепер валідуємо структуру через Pydantic 
+    try:
+        # Перевірка на відповідність структурі RouteResponseSchema
+        validated_data = RouteResponseSchema(**raw_json)
+        # .model_dump() перетворює Pydantic-об'єкт назад у звичайний Python dict
+        return validated_data.model_dump()
+    except ValidationError as e:
+        # Логуємо помилку для розробника в консоль, щоб бачити, що саме ШІ повернув не так
+        print(f"❌ Pydantic Validation Error: {e}")
+        return None
 
 
-
+# --- 3. Django Views ---
 
 @login_required
 def ai_route(request):
     if request.method == "POST":
-        data = json.loads(request.body)
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid request body JSON"}, status=400)
+
         route_name = data.get("route_name", "AI Маршрут")
-        city_name = data["city"]
+        city_name = data.get("city")
         categories = data.get("categories", [])
         visibility = data.get("visibility", "private")
 
-        city = City.objects.get(name=city_name)
+        if not city_name:
+            return JsonResponse({"error": "City name is required"}, status=400)
+
+        try:
+            city = City.objects.get(name=city_name)
+        except City.DoesNotExist:
+            return JsonResponse({"error": f"City '{city_name}' not found in database"}, status=404)
 
         prompt = f"""
             Знайди реальні туристичні місця у місті {city_name}.
@@ -161,24 +204,23 @@ def ai_route(request):
 
             Для кожного маршруту:
             - придумай назву
-            - 5-10 місць
+            - від 5 до 10 місць
             - місця повинні бути логічно згруповані
             - використовуй тільки реальні місця
 
-            Для кожного місця поверни:
+            Для кожного місця обов'язково заповни поля:
+            name, address, lat, lon, rating, category.
 
-            name
-            address
-            lat
-            lon
-            rating
-            category
-
-            Не додавай пояснень.
-            Поверни лише JSON.
+            Не додавай жодних пояснень, крім JSON структури.
         """
 
         ai_response = call_ai_model(prompt)
+
+        # Якщо валідація всередині call_ai_model провалилася, повертаємо помилку користувачу
+        if ai_response is None:
+            return JsonResponse({
+                "error": "Не вдалося отримати валідну структуру даних від ШІ. Спробуйте ще раз або змініть запит."
+            }, status=502) # 502 Bad Gateway тут логічно підходить, бо підвів зовнішній сервіс
 
         return JsonResponse({
             "routes": ai_response["routes"],
@@ -186,20 +228,29 @@ def ai_route(request):
             "city": city_name,
             "visibility": visibility
         })
+        
     return JsonResponse({"error": "Invalid method"}, status=405)
-
 
 
 @login_required
 def save_ai_route(request):
+    # Тут залишаємо вашу логіку збереження без змін, оскільки дані 
+    # вже пройшли валідацію на першому етапі.
     if request.method == "POST":
-        data = json.loads(request.body)
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid request body JSON"}, status=400)
+            
         route_name = data.get("route_name", "AI Маршрут")
         city_name = data["city"]
         visibility = data.get("visibility", "private")
         places = data.get("places", [])
 
-        city = City.objects.get(name=city_name)
+        try:
+            city = City.objects.get(name=city_name)
+        except City.DoesNotExist:
+            return JsonResponse({"error": "City not found"}, status=404)
 
         route = UserRoute.objects.create(
             user=request.user,
@@ -208,40 +259,29 @@ def save_ai_route(request):
             name=route_name
         )
 
-        normalized_places = []
+        # Оскільки ми провалідували дані Pydantic'ом в ai_route, 
+        # ключі гарантировано будуть англійською ("name", "address" і т.д.)
         for p in places:
-            normalized_places.append({
-                "name": p.get("name") or p.get("назва"),
-                "address": p.get("address") or p.get("адреса", "-"),
-                "lat": p.get("lat"),
-                "lon": p.get("lon"),
-                "rating": p.get("rating", 0),
-                "category": p.get("category") or p.get("тип")
-            })
-
-        for p in normalized_places:
             place_obj, _ = Place.objects.update_or_create(
                 city=city,
-                name=p["name"],
-                lat=p["lat"],
-                lon=p["lon"],
-                category=p["category"],
+                name=p.get("name"),
+                lat=p.get("lat"),
+                lon=p.get("lon"),
+                category=p.get("category"),
                 defaults={
-                    "address": p.get("address"),
-                    "rating": p.get("rating"),
+                    "address": p.get("address", "-"),
+                    "rating": p.get("rating", 0.0),
                 }
             )
             route.places.add(place_obj)
-            
 
         return JsonResponse({
             "route_id": route.id,
             "route_name": route.name,
             "created_at": route.created_at.strftime("%d.%m.%Y %H:%M")
         })
+        
     return JsonResponse({"error": "Invalid method"}, status=405)
-
-
 @login_required
 def ai_route_page(request):
     cities = City.objects.all()

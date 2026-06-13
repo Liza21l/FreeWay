@@ -218,6 +218,39 @@
 .route-card input[type="radio"]{
     margin-right:8px;
 }
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #163867;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 10px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error {
+  color: red;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.retry-btn {
+  background: #163867;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.retry-btn:hover {
+  background: #0f2850;
+}
+
 
 [id^="map-"]{
     border-radius:20px;
@@ -378,14 +411,18 @@ document.getElementById("ai-route-form").addEventListener("submit", function(e){
     const visibility = document.getElementById("aiVisibility").value;
 
     const categories = [
-        ...document.querySelectorAll(
-            "#ai-route-form input[name='categories']:checked"
-        )
+        ...document.querySelectorAll("#ai-route-form input[name='categories']:checked")
     ].map(c => c.value);
 
     const block = document.getElementById("ai-routes-result");
 
-    block.innerHTML = "<p>Маршрут будується...</p>";
+    // показуємо спіннер
+    block.innerHTML = `
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Маршрут будується...</p>
+      </div>
+    `;
 
     document.getElementById("ai-route-form").style.display = "none";
 
@@ -404,38 +441,29 @@ document.getElementById("ai-route-form").addEventListener("submit", function(e){
     })
     .then(res => res.json())
     .then(data => {
-
         block.innerHTML = "";
 
         const routes = data.routes || [];
 
-        console.log("Routes:", routes);
-
         if (!Array.isArray(routes) || routes.length === 0) {
-            block.innerHTML =
-                "<p>Не вдалося побудувати маршрут.</p>";
+            block.innerHTML = `
+              <p class="error">Не вдалося побудувати маршрут.</p>
+              <button class="retry-btn" onclick="retryRoute()">Спробувати ще раз</button>
+            `;
             return;
         }
 
         routes.forEach((routeData, i) => {
-
             const route = routeData.places || [];
-
             const div = document.createElement("div");
-
             div.className = "route-card";
 
             div.innerHTML = `
                 <h4>${routeData.name || `Варіант ${i + 1}`}</h4>
-
                 <label>
-                    <input
-                        type="radio"
-                        name="selectedRoute"
-                        value="${i}">
+                    <input type="radio" name="selectedRoute" value="${i}">
                     Обрати цей маршрут
                 </label>
-
                 <ul>
                     ${route.map(p => `
                         <li>
@@ -445,207 +473,101 @@ document.getElementById("ai-route-form").addEventListener("submit", function(e){
                         </li>
                     `).join("")}
                 </ul>
-
-                <div id="map-${i}"
-                     style="height:300px; margin-top:10px;">
-                </div>
-
+                <div id="map-${i}" style="height:300px; margin-top:10px;"></div>
                 <div id="info-${i}"></div>
             `;
 
             block.appendChild(div);
 
-            if (
-                route.length > 0 &&
-                route[0].lat &&
-                route[0].lon
-            ) {
-
-                const map = L.map(`map-${i}`)
-                    .setView(
-                        [route[0].lat, route[0].lon],
-                        14
-                    );
-
-                L.tileLayer(
-                    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                    {
-                        attribution:
-                            "© OpenStreetMap"
-                    }
-                ).addTo(map);
+            if (route.length > 0 && route[0].lat && route[0].lon) {
+                const map = L.map(`map-${i}`).setView([route[0].lat, route[0].lon], 14);
+                L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                    attribution:"© OpenStreetMap"
+                }).addTo(map);
 
                 route.forEach((place, idx) => {
-
                     if (place.lat && place.lon) {
-
-                        L.marker([
-                            place.lat,
-                            place.lon
-                        ])
-                        .bindPopup(`
-                            <b>${idx + 1}. ${place.name}</b>
-                            <br>
-                            Рейтинг:
-                            ${place.rating || '—'}
-                        `)
+                        L.marker([place.lat, place.lon])
+                        .bindPopup(`<b>${idx + 1}. ${place.name}</b><br>Рейтинг: ${place.rating || '—'}`)
                         .addTo(map);
                     }
                 });
 
                 if (route.length > 1) {
-
                     const control = L.Routing.control({
-                        waypoints: route.map(
-                            p => L.latLng(
-                                p.lat,
-                                p.lon
-                            )
-                        ),
-
+                        waypoints: route.map(p => L.latLng(p.lat, p.lon)),
                         router: L.Routing.osrmv1({
-                            serviceUrl:
-                                "https://router.project-osrm.org/route/v1",
-                            profile: "foot",
+                            serviceUrl:"https://router.project-osrm.org/route/v1",
+                            profile:"foot",
                         }),
-
-                        lineOptions: {
-                            styles: [{
-                                color: "#4A90E2",
-                                weight: 5,
-                                opacity: 0.85
-                            }]
-                        },
-
+                        lineOptions:{ styles:[{ color:"#4A90E2", weight:5, opacity:0.85 }] },
                         createMarker: () => null,
-
-                        show: false,
-
+                        show:false,
                     }).addTo(map);
 
-                    control.on(
-                        "routesfound",
-                        (e) => {
-
-                            const r =
-                                e.routes[0];
-
-                            const km =
-                                (
-                                    r.summary.totalDistance /
-                                    1000
-                                ).toFixed(2);
-
-                            const min =
-                                Math.round(
-                                    r.summary.totalTime /
-                                    7
-                                );
-
-                            document.getElementById(
-                                `info-${i}`
-                            ).innerHTML = `
-                                Маршрут:
-                                <b>${km} км</b>
-                                |
-                                Час пішки:
-                                <b>~${min} хв</b>
-                            `;
-                        }
-                    );
+                    control.on("routesfound", (e) => {
+                        const r = e.routes[0];
+                        const km = (r.summary.totalDistance / 1000).toFixed(2);
+                        const min = Math.round(r.summary.totalTime / 7);
+                        document.getElementById(`info-${i}`).innerHTML = `
+                            Маршрут: <b>${km} км</b> | Час пішки: <b>~${min} хв</b>
+                        `;
+                    });
                 }
             }
         });
 
-        const saveBtn =
-            document.createElement("button");
-
-        saveBtn.textContent =
-            "Зберегти вибраний маршрут";
-
+        const saveBtn = document.createElement("button");
+        saveBtn.textContent = "Зберегти вибраний маршрут";
         saveBtn.className = "find-btn";
 
         saveBtn.onclick = () => {
-
-            const selectedIndex =
-                document.querySelector(
-                    "input[name='selectedRoute']:checked"
-                );
-
+            const selectedIndex = document.querySelector("input[name='selectedRoute']:checked");
             if (!selectedIndex) {
-
-                alert(
-                    "Оберіть один маршрут!"
-                );
-
+                alert("Оберіть один маршрут!");
                 return;
             }
-
-            const selectedRoute =
-                routes[
-                    selectedIndex.value
-                ].places;
-
-            fetch(
-                "{% url 'save_ai_route' %}",
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json",
-                        "X-CSRFToken":
-                            "{{ csrf_token }}"
-                    },
-
-                    body: JSON.stringify({
-                        route_name:
-                            routeName,
-
-                        city,
-
-                        visibility,
-
-                        places:
-                            selectedRoute
-                    })
-                }
-            )
+            const selectedRoute = routes[selectedIndex.value].places;
+            fetch("{% url 'save_ai_route' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type":"application/json",
+                    "X-CSRFToken":"{{ csrf_token }}"
+                },
+                body: JSON.stringify({
+                    route_name: routeName,
+                    city,
+                    visibility,
+                    places: selectedRoute
+                })
+            })
             .then(res => res.json())
             .then(resp => {
-
-                alert(
-                    "Маршрут збережено! ID: "
-                    + resp.route_id
-                );
-
+                alert("Маршрут збережено! ID: " + resp.route_id);
             })
             .catch(err => {
-
                 console.error(err);
-
-                alert(
-                    "Помилка збереження маршруту"
-                );
-
+                alert("Помилка збереження маршруту");
             });
         };
 
         block.appendChild(saveBtn);
-
     })
     .catch(err => {
-
         console.error(err);
-
         block.innerHTML = `
-            <p>
-                Помилка під час
-                побудови маршруту.
-            </p>
+          <p class="error">Сталася помилка, спробуйте ще раз.</p>
+          <button class="retry-btn" onclick="retryRoute()">Спробувати ще раз</button>
         `;
     });
 });
+
+// функція повторної спроби
+function retryRoute(){
+    document.getElementById("ai-route-form").style.display = "block";
+    document.getElementById("ai-routes-result").innerHTML = "";
+    document.getElementById("ai-route-form").scrollIntoView({ behavior: "smooth", block: "center" });
+}
 </script>
 
 </body>
