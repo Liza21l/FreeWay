@@ -551,6 +551,145 @@
         #closeActive:hover {
             background:#e2e2e2;
         }
+        .footer{
+            margin-top:60px;
+            background:#163867;
+            color:white;
+            
+            padding:40px 30px 25px;
+        }
+
+        .footer-logo{
+            display:flex;
+            align-items:flex-start;
+            gap:15px;
+        }
+
+        .footer-logo-icon{
+            width:50px;
+            height:50px;
+            border-radius:15px;
+            background:rgba(255,255,255,0.08);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:22px;
+            font-weight:700;
+        }
+
+        .footer-brand{
+            font-size:32px;
+            font-weight:700;
+            margin-bottom:10px;
+        }
+
+        .footer-description{
+            color:rgba(255,255,255,0.7);
+            line-height:1.6;
+            max-width:500px;
+        }
+
+        .footer-divider{
+            height:1px;
+            background:rgba(255,255,255,0.12);
+            margin:35px 0;
+        }
+
+        .footer-title{
+            color:#7ea6e8;
+            font-weight:700;
+            letter-spacing:1px;
+            margin-bottom:20px;
+            margin-top:20px;
+        }
+
+        .footer-contact{
+            display:flex;
+            align-items:center;
+            gap:15px;
+            margin-bottom:18px;
+        }
+
+        .footer-contact-icon{
+            width:50px;
+            height:50px;
+            border-radius:14px;
+            background:rgba(255,255,255,0.08);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:20px;
+        }
+
+        .footer-label{
+            color:rgba(255,255,255,0.6);
+            font-size:14px;
+        }
+
+        .footer-value{
+            font-size:22px;
+            font-weight:600;
+        }
+
+        .footer-links{
+            display:flex;
+            flex-direction:column;
+            margin-top:10px;
+        }
+
+        .footer-link{
+            color:white;
+            text-decoration:none;
+            padding:18px 0;
+            border-bottom:1px solid rgba(255,255,255,0.08);
+            font-size:20px;
+            transition:.2s;
+        }
+
+        .footer-link:hover{
+            padding-left:10px;
+        }
+
+        .footer-bottom{
+            margin-top:40px;
+            padding-top:25px;
+            border-top:1px solid rgba(255,255,255,0.08);
+            display:flex;
+            justify-content:space-between;
+            color:rgba(255,255,255,0.5);
+            font-size:15px;
+        }
+
+        @media(max-width:768px){
+
+            .footer{
+                padding:30px 20px;
+                border-radius:30px 30px 0 0;
+            }
+
+            .footer-brand{
+                font-size:26px;
+            }
+
+            .footer-description{
+                font-size:15px;
+            }
+
+            .footer-value{
+                font-size:18px;
+                word-break:break-word;
+            }
+
+            .footer-link{
+                font-size:18px;
+            }
+
+            .footer-bottom{
+                flex-direction:column;
+                gap:10px;
+                text-align:center;
+            }
+        }
 
         /* Анімація */
         @keyframes fadeIn {
@@ -1077,6 +1216,107 @@
         </div>
 
     </div>
+    <footer class="footer">
+
+        <div class="footer-logo">
+
+            <div class="footer-logo-icon">
+                A
+            </div>
+
+            <div>
+                <div class="footer-brand">
+                    FreeWay
+                </div>
+
+                <div class="footer-description">
+                    Досліджуй місто та будуй маршрути для незабутніх прогулянок.
+                </div>
+            </div>
+
+        </div>
+
+        <div class="footer-divider"></div>
+
+        <div class="footer-title">
+            КОНТАКТИ
+        </div>
+
+        <div class="footer-contact">
+
+            <div class="footer-contact-icon">
+                📞
+            </div>
+
+            <div>
+
+                <div class="footer-label">
+                    Телефон
+                </div>
+
+                <div class="footer-value">
+                    098 123 67 67
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="footer-contact">
+
+            <div class="footer-contact-icon">
+                ✉️
+            </div>
+
+            <div>
+
+                <div class="footer-label">
+                    Електронна пошта
+                </div>
+
+                <div class="footer-value">
+                    freewayvinnytsia@gmail.com
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="footer-title">
+            ІНФОРМАЦІЯ
+        </div>
+
+        <div class="footer-links">
+
+            <a href="{% url 'privacy_policy'%}" class="footer-link">
+                Політика конфіденційності
+            </a>
+
+            <a href="#" class="footer-link">
+                Правила користування
+            </a>
+
+            <a href="#" class="footer-link">
+                Контакти
+            </a>
+            <a href="#" class="footer-link">
+                Про нас
+            </a>
+        </div>
+
+        <div class="footer-bottom">
+
+            <span>
+                © 2025 FreeWay
+            </span>
+
+            <span>
+                Вінниця, Україна
+            </span>
+
+        </div>
+
+    </footer>
 
 </div>
 

@@ -442,6 +442,10 @@ def ai_route_page(request):
     return render(request, "places/ai_route.html", {"cities": cities})
 
 @login_required
+def privacy_policy(request):
+    return render(request, "places/privacy_policy.html")
+
+@login_required
 def shared_route_view(request, share_uuid):
     route = get_object_or_404(UserRoute, share_uuid=share_uuid, visibility="public")
 

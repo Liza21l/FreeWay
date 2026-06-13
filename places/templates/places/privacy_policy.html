@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Політика конфіденційності</title>
+    <link rel="stylesheet" href="privacy.css">
+</head>
+<style>
+    body{
+    margin:0;
+    background:#f5f6fa;
+    font-family:'Segoe UI',sans-serif;
+    color:#163867;
+}
+
+.header{
+    background:#163867;
+    color:white;
+    padding:40px 25px 60px;
+    border-bottom-left-radius:40px;
+    border-bottom-right-radius:40px;
+}
+
+.back-btn{
+    position:absolute;
+    top:20px;
+    left:20px;
+    width:42px;
+    height:42px;
+    border-radius:12px;
+    background:rgba(255,255,255,.12);
+    color:white;
+    text-decoration:none;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+}
+
+.header h1{
+    margin-top:35px;
+    margin-bottom:12px;
+    font-size:38px;
+}
+
+.header p{
+    font-size:20px;
+    opacity:.9;
+    line-height:1.5;
+}
+
+.container{
+    max-width:900px;
+    margin:-30px auto 40px;
+    padding:0 20px;
+}
+
+.policy-date{
+    background:white;
+    border-radius:20px;
+    padding:20px;
+    display:flex;
+    gap:25px;
+    flex-wrap:wrap;
+    margin-bottom:20px;
+    box-shadow:0 4px 20px rgba(0,0,0,.05);
+}
+
+.policy-section{
+    background:white;
+    border-radius:24px;
+    padding:25px;
+    margin-bottom:20px;
+    box-shadow:0 4px 20px rgba(0,0,0,.05);
+}
+
+.section-number{
+    width:34px;
+    height:34px;
+    border-radius:10px;
+    background:#dce8ff;
+    color:#163867;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+    margin-bottom:15px;
+}
+
+.policy-section h2{
+    margin-top:0;
+    color:#163867;
+}
+
+.policy-section p{
+    color:#666;
+    line-height:1.8;
+}
+
+.info-card{
+    background:#f8f8f8;
+    border:1px solid #ececec;
+    border-radius:14px;
+    padding:16px;
+    margin-bottom:12px;
+}
+
+.notice-box{
+    background:#eef5ff;
+    border:1px solid #c9ddff;
+    color:#163867;
+    border-radius:16px;
+    padding:18px;
+    margin-top:15px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    overflow:hidden;
+    border-radius:16px;
+}
+
+thead{
+    background:#163867;
+    color:white;
+}
+
+th,td{
+    padding:15px;
+    text-align:left;
+    border:1px solid #ececec;
+}
+
+@media(max-width:768px){
+
+    .header h1{
+        font-size:28px;
+    }
+
+    .header p{
+        font-size:16px;
+    }
+
+    .policy-section{
+        padding:18px;
+    }
+
+    th,td{
+        font-size:14px;
+        padding:10px;
+    }
+
+}
+</style>
+<body>
+
+<div class="header">
+
+    <a href="{% url 'home' %}" class="back-btn">←</a>
+
+    <h1>Політика конфіденційності</h1>
+
+    <p>
+        Ми дбаємо про безпеку ваших даних та прозорість їх використання.
+    </p>
+
+</div>
+
+<div class="container">
+
+    <div class="policy-date">
+        <span>● Набрала чинності: <b style="color: rgb(36, 179, 7);">09.06.2026</b></span>
+        <span>● Остання редакція: <b style="color: rgb(36, 179, 7);">09.06.2026</b></span>
+    </div>
+
+    <div class="policy-section">
+
+        <div class="section-number">1</div>
+
+        <h2>Загальні положення</h2>
+
+        <p>
+            Ця Політика пояснює, які персональні дані збирає
+            FreeWay, як ми їх використовуємо та захищаємо, а
+            також які права має користувач щодо своїх даних.
+        </p>
+
+        <p>
+            Використовуючи FreeWay, Ви надаєте згоду на
+            обробку ваших персональних даних. Складено
+            відповідно до Закону України «Про захист
+            персональних даних» № 2297-VI та GDPR.
+        </p>
+
+    </div>
+
+    <div class="policy-section">
+
+        <div class="section-number">2</div>
+
+        <h2>Які дані ми збираємо</h2>
+
+        <div class="info-card">
+            <strong>Ім'я</strong> — під час реєстрації або редагування профілю.
+        </div>
+
+        <div class="info-card">
+            <strong>Email</strong> — для авторизації та відновлення доступу.
+        </div>
+
+        <div class="info-card">
+            <strong>Геолокація</strong> — лише для побудови маршрутів.
+        </div>
+
+        <div class="info-card">
+            <strong>Маршрути та місця</strong> — для збереження історії.
+        </div>
+
+        <div class="info-card">
+            <strong>Технічні дані</strong> — браузер, пристрій, помилки.
+        </div>
+
+        <div class="notice-box">
+            Ми <b>не збираємо</b> банківські картки,
+            <b>не продаємо</b> дані третім особам
+            та не відстежуємо місцезнаходження у фоні.
+        </div>
+
+    </div>
+
+    <div class="policy-section">
+
+        <div class="section-number">3</div>
+
+        <h2>Для чого використовуються дані</h2>
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Дані</th>
+                    <th>Мета використання</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td>Email</td>
+                    <td>Авторизація та повідомлення</td>
+                </tr>
+
+                <tr>
+                    <td>Ім'я</td>
+                    <td>Відображення профілю</td>
+                </tr>
+
+                <tr>
+                    <td>Геолокація</td>
+                    <td>Побудова маршрутів</td>
+                </tr>
+
+                <tr>
+                    <td>Маршрути</td>
+                    <td>Персоналізація сервісу</td>
+                </tr>
+
+                <tr>
+                    <td>Технічні дані</td>
+                    <td>Покращення роботи сервісу</td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div class="policy-section">
+
+        <div class="section-number">4</div>
+
+        <h2>Підстави обробки</h2>
+
+        <div class="info-card">
+            <strong>Виконання договору</strong> — для надання функцій Сервісу.
+        </div>
+
+        <div class="info-card">
+            <strong>Законний інтерес</strong> — ехнічні дані для безпеки та стабільності.
+        </div>
+
+        <div class="info-card">
+            <strong>Згода</strong> —  геолокація запитується окремо, дозвіл можна відкликати.
+        </div>
+
+    </div>
+
+    <div class="policy-section">
+
+        <div class="section-number">5</div>
+
+        <h2>Передача даних третім особам</h2>
+
+        <div class="info-card">
+            <b>Google Maps Platform</b> — для відображення карт та маршрутів.
+        </div>
+
+        <div class="info-card">
+            <b>Хостинг-провайдер </b> — зберігання даних на захищених серверах.
+        </div>
+
+        <div class="info-card">
+           <b> Аналітичні сервіси </b> — анонімізовані технічні дані.
+        </div>
+        <p>
+            Ми не продаємо дані рекламним мережам. Дані
+            можуть бути розкриті на законну вимогу органів
+            влади.
+        </p>
+    </div>
+
+    <div class="policy-section">
+
+        <div class="section-number">6</div>
+
+        <h2>Зберігання та захист</h2>
+
+        <div class="info-card">
+            <b>Дані облікового запису</b> — до моменту його видалення.
+        </div>
+
+        <div class="info-card">
+            <b>Маршрути та місця</b> — до видалення вами або акаунтом.
+        </div>
+
+        <div class="info-card">
+            <b>Технічні журнали</b> — не більше 12 місяців.
+        </div>
+
+        <div class="notice-box">
+            Після видалення акаунта дані видаляються протягом <b>30 днів.</b>
+        </div>
+
+    </div>
+
+    <div class="policy-section">
+
+        <div class="section-number">7</div>
+
+        <h2>Ваші права</h2>
+
+        <div class="info-card"><b>Доступ </b> — отримати копію ваших персональних даних.</div>
+        <div class="info-card"><b>Виправлення</b> — змінити неточні або застарілі дані.</div>
+        <div class="info-card"><b>Видалення</b> — «право на забуття».</div>
+        <div class="info-card"><b>Перенесення</b> — отримати дані у машинозчитуваному форматі.</div>
+        <div class="info-card"><b>Відкликання згоди</b> — зокрема дозволу на геолокацію.</div>
+
+        <div class="notice-box">
+            Email для звернень:
+            <br>
+            <b>freewayvinnytsia@gmail.com</b>
+        </div>
+
+    </div>
+
+    <div class="policy-section">
+
+        <div class="section-number">8</div>
+
+        <h2>Файли cookie</h2>
+
+        <p>
+            Вебверсія FreeWay використовує cookie для
+            підтримки сесії та запам'ятовування налаштувань. Ви
+            можете відключити cookie в налаштуваннях
+            браузера.
+        </p>
+
+    </div>
+
+    <div class="policy-section">
+
+        <div class="section-number">9</div>
+
+        <h2>Діти</h2>
+
+        <p>
+            Сервіс не призначений для осіб молодше 13 років.
+            Якщо вам відомо про такі випадки — повідомте нас, і
+            ми видалимо ці дані.
+        </p>
+
+    </div>
+
+    <div class="policy-section">
+
+        <div class="section-number">10</div>
+
+        <h2>Зміни до Політики</h2>
+
+        <p>
+            У разі суттєвих змін ми повідомимо через застосунок
+            або email не менш ніж за 7 днів до набрання
+            чинності.
+        </p>
+
+    </div>
+
+</div>
+
+</body>
+</html>
