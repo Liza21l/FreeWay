@@ -246,6 +246,9 @@
         .submit-btn:hover{
             background:#102c55;
         }
+        .city-select.error {
+            border: 2px solid red;
+}
 
         /* LOADER */
 
@@ -654,6 +657,21 @@
         }
 
     });
+
+document.addEventListener("DOMContentLoaded", () => {
+    const citySelect = document.getElementById("citySelect");
+    const showBtn = document.getElementById("submitBtn");
+
+    showBtn.addEventListener("click", (e) => {
+        if (!citySelect.value) {
+            e.preventDefault(); // блокуємо відправку форми
+            citySelect.classList.add("error"); // додаємо червону рамку
+            citySelect.scrollIntoView({ behavior: "smooth", block: "center" });
+        } else {
+            citySelect.classList.remove("error"); // якщо вибрано — прибираємо рамку
+        }
+    });
+});
 
 </script>
 
