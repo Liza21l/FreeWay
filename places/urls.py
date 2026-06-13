@@ -26,5 +26,8 @@ urlpatterns = [
     path("ai_route/", views.ai_route, name="ai_route"),
     path("save_ai_route/", views.save_ai_route, name="save_ai_route"),
     path("ai_route_page/", views.ai_route_page, name="ai_route_page"),
-    path("privacy_policy/", views.privacy_policy, name="privacy_policy")
+    path("privacy_policy/", views.privacy_policy, name="privacy_policy"),
+    path("user_rules/", views.user_rules, name="user_rules"),
+    path("contacts", views.contacts, name="contacts"),
+    path("abouUs/", views.aboutUs, name="aboutUs"),
 ]

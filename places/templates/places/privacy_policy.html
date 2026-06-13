@@ -7,199 +7,260 @@
     <link rel="stylesheet" href="privacy.css">
 </head>
 <style>
-    body{
-    margin:0;
-    background:#f5f6fa;
-    font-family:'Segoe UI',sans-serif;
-    color:#163867;
+/* Загальні налаштування */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-.header{
-    background:#163867;
-    color:white;
-    padding:40px 25px 60px;
-    border-bottom-left-radius:40px;
-    border-bottom-right-radius:40px;
+body {
+    background-color: #f6f6f4; /* Сірий фон для ПК, щоб виділити мобільне вікно */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
 }
 
-.back-btn{
-    position:absolute;
-    top:20px;
-    left:20px;
-    width:42px;
-    height:42px;
-    border-radius:12px;
-    background:rgba(255,255,255,.12);
-    color:white;
-    text-decoration:none;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:22px;
+/* Головний контейнер - тепер він тримає всю сторінку докупи */
+.container {
+    width: 100%;
+    max-width: 480px; /* Обмеження ширини під телефон */
+    background-color: #ffffff;
+    min-height: 100vh;
+    padding: 0 16px 40px 16px;
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
 }
 
-.header h1{
-    margin-top:35px;
-    margin-bottom:12px;
-    font-size:38px;
-}
-
-.header p{
-    font-size:20px;
-    opacity:.9;
-    line-height:1.5;
-}
-
-.container{
-    max-width:900px;
-    margin:-30px auto 40px;
-    padding:0 20px;
-}
-
-.policy-date{
-    background:white;
-    border-radius:20px;
-    padding:20px;
-    display:flex;
-    gap:25px;
-    flex-wrap:wrap;
-    margin-bottom:20px;
-    box-shadow:0 4px 20px rgba(0,0,0,.05);
-}
-
-.policy-section{
-    background:white;
-    border-radius:24px;
-    padding:25px;
-    margin-bottom:20px;
-    box-shadow:0 4px 20px rgba(0,0,0,.05);
-}
-
-.section-number{
-    width:34px;
-    height:34px;
-    border-radius:10px;
-    background:#dce8ff;
-    color:#163867;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-weight:700;
-    margin-bottom:15px;
-}
-
-.policy-section h2{
-    margin-top:0;
-    color:#163867;
-}
-
-.policy-section p{
-    color:#666;
-    line-height:1.8;
-}
-
-.info-card{
-    background:#f8f8f8;
-    border:1px solid #ececec;
-    border-radius:14px;
-    padding:16px;
-    margin-bottom:12px;
-}
-
-.notice-box{
-    background:#eef5ff;
-    border:1px solid #c9ddff;
-    color:#163867;
-    border-radius:16px;
-    padding:18px;
-    margin-top:15px;
-}
-
-table{
-    width:100%;
-    border-collapse:collapse;
-    overflow:hidden;
-    border-radius:16px;
-}
-
-thead{
-    background:#163867;
-    color:white;
-}
-
-th,td{
-    padding:15px;
-    text-align:left;
-    border:1px solid #ececec;
-}
-
-@media(max-width:768px){
-
-    .header h1{
-        font-size:28px;
+/* Адаптивність під реальні смартфони */
+@media (max-width: 480px) {
+    .container {
+        max-width: 100%;
+        box-shadow: none;
+        padding: 0 12px 30px 12px;
     }
+}
 
-    .header p{
-        font-size:16px;
-    }
+/* Шапка */
+.header {
+    display: flex;
+    align-items: center;
+    padding: 18px 0 14px 0;
+    position: relative;
+    border-bottom: 1px solid #f2f1ed;
+    background-color: #ffffff;
+}
 
-    .policy-section{
-        padding:18px;
-    }
+.header h1 {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1a3c6d;
+    margin-left: 50px; /* Залишаємо місце для кнопки */
+}
 
-    th,td{
-        font-size:14px;
-        padding:10px;
-    }
+/* Кнопка Повернення */
+.back-btn {
+    position: absolute;
+    left: 0;
+    top: 10px;
+    width: 36px;
+    height: 36px;
+    background-color: #f3f2ef;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: transparent;
+}
 
+/* Елегантна стрілочка «назад» */
+.back-btn::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-left: 2px solid #4a4a4a;
+    border-bottom: 2px solid #4a4a4a;
+    transform: rotate(45deg);
+    margin-left: 2px;
+}
+
+/* Панель з датами редакції */
+.policy-date {
+    background-color: #faf9f6;
+    margin: 0 -16px 24px -16px;
+    padding: 12px 16px;
+    font-size: 11px;
+    color: #777777;
+    border-bottom: 1px solid #f2f1ed;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* Забираємо стандартні точки, малюємо кастомні зелені */
+.policy-date span {
+    display: flex;
+    align-items: center;
+}
+
+.policy-date span::before {
+    content: "●";
+    color: #24b307;
+    font-size: 8px;
+    margin-right: 6px;
+}
+
+/* Розділи тексту */
+.policy-section {
+    margin-bottom: 26px;
+}
+
+.section-number {
+    width: 22px;
+    height: 22px;
+    background-color: #e8f0fe;
+    color: #1a3c6d;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+}
+
+.policy-section h2 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a3c6d;
+    margin-bottom: 10px;
+}
+
+.policy-section p {
+    font-size: 13px;
+    line-height: 1.5;
+    color: #555555;
+    margin-bottom: 10px;
+}
+
+/* Плашки списків даних */
+.info-card {
+    background-color: #f8f7f5;
+    padding: 12px 14px 12px 32px;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: #4a4a4a;
+    margin-bottom: 8px;
+    position: relative;
+}
+
+/* Сині маркери всередині карток */
+.info-card::before {
+    content: '';
+    position: absolute;
+    left: 14px;
+    top: 18px;
+    width: 5px;
+    height: 5px;
+    background-color: #3b82f6;
+    border-radius: 50%;
+}
+
+.info-card strong, .info-card b {
+    color: #1a3c6d;
+    font-weight: 700;
+}
+
+/* Важливі повідомлення (сині плашки) */
+.notice-box {
+    background-color: #ebf3ff;
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 12.5px;
+    line-height: 1.45;
+    color: #1a3c6d;
+    margin-top: 12px;
+    margin-bottom: 12px;
+}
+
+/* Таблиця */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    background-color: #ffffff;
+    border: 1px solid #f0eee9;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+th {
+    background-color: #102e5b;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+    padding: 12px 14px;
+}
+
+td {
+    font-size: 12.5px;
+    color: #555555;
+    padding: 12px 14px;
+    border-bottom: 1px solid #f4f3f0;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+th:first-child, td:first-child {
+    width: 35%;
+    font-weight: 600;
+    color: #1a3c6d;
+}
+
+thead th:first-child {
+    color: #ffffff;
 }
 </style>
 <body>
 
-<div class="header">
-
-    <a href="{% url 'home' %}" class="back-btn">←</a>
-
-    <h1>Політика конфіденційності</h1>
-
-    <p>
-        Ми дбаємо про безпеку ваших даних та прозорість їх використання.
-    </p>
-
-</div>
-
 <div class="container">
 
+    <div class="header">
+        <a href="{% url 'home' %}" class="back-btn"></a>
+        <h1>Політика конфіденційності</h1>
+    </div>
+
     <div class="policy-date">
-        <span>● Набрала чинності: <b style="color: rgb(36, 179, 7);">09.06.2026</b></span>
-        <span>● Остання редакція: <b style="color: rgb(36, 179, 7);">09.06.2026</b></span>
+        <span>Набрала чинності: <b style="color: rgb(36, 179, 7);">09.06.2026</b></span>
+        <span>Остання редакція: <b style="color: rgb(36, 179, 7);">09.06.2026</b></span>
     </div>
 
     <div class="policy-section">
-
         <div class="section-number">1</div>
-
         <h2>Загальні положення</h2>
-
         <p>
             Ця Політика пояснює, які персональні дані збирає
             FreeWay, як ми їх використовуємо та захищаємо, а
             також які права має користувач щодо своїх даних.
         </p>
-
         <p>
             Використовуючи FreeWay, Ви надаєте згоду на
             обробку ваших персональних даних. Складено
             відповідно до Закону України «Про захист
             персональних даних» № 2297-VI та GDPR.
         </p>
-
     </div>
 
     <div class="policy-section">
-
         <div class="section-number">2</div>
-
         <h2>Які дані ми збираємо</h2>
 
         <div class="info-card">
@@ -227,93 +288,71 @@ th,td{
             <b>не продаємо</b> дані третім особам
             та не відстежуємо місцезнаходження у фоні.
         </div>
-
     </div>
 
     <div class="policy-section">
-
         <div class="section-number">3</div>
-
         <h2>Для чого використовуються дані</h2>
 
         <table>
-
             <thead>
                 <tr>
                     <th>Дані</th>
                     <th>Мета використання</th>
                 </tr>
             </thead>
-
             <tbody>
-
                 <tr>
                     <td>Email</td>
                     <td>Авторизація та повідомлення</td>
                 </tr>
-
                 <tr>
                     <td>Ім'я</td>
                     <td>Відображення профілю</td>
                 </tr>
-
                 <tr>
                     <td>Геолокація</td>
                     <td>Побудова маршрутів</td>
                 </tr>
-
                 <tr>
                     <td>Маршрути</td>
                     <td>Персоналізація сервісу</td>
                 </tr>
-
                 <tr>
                     <td>Технічні дані</td>
                     <td>Покращення роботи сервісу</td>
                 </tr>
-
             </tbody>
-
         </table>
-
     </div>
 
     <div class="policy-section">
-
         <div class="section-number">4</div>
-
         <h2>Підстави обробки</h2>
 
         <div class="info-card">
             <strong>Виконання договору</strong> — для надання функцій Сервісу.
         </div>
-
         <div class="info-card">
-            <strong>Законний інтерес</strong> — ехнічні дані для безпеки та стабільності.
+            <strong>Законний інтерес</strong> — технічні дані для безпеки та стабільності.
         </div>
-
         <div class="info-card">
-            <strong>Згода</strong> —  геолокація запитується окремо, дозвіл можна відкликати.
+            <strong>Згода</strong> — геолокація запитується окремо, дозвіл можна відкликати.
         </div>
-
     </div>
 
     <div class="policy-section">
-
         <div class="section-number">5</div>
-
         <h2>Передача даних третім особам</h2>
 
         <div class="info-card">
             <b>Google Maps Platform</b> — для відображення карт та маршрутів.
         </div>
-
         <div class="info-card">
-            <b>Хостинг-провайдер </b> — зберігання даних на захищених серверах.
+            <b>Хостинг-провайдер</b> — зберігання даних на захищених серверах.
         </div>
-
         <div class="info-card">
-           <b> Аналітичні сервіси </b> — анонімізовані технічні дані.
+            <b>Аналітичні сервіси</b> — анонімізовані технічні дані.
         </div>
         <p>
             Ми не продаємо дані рекламним мережам. Дані
@@ -323,36 +362,29 @@ th,td{
     </div>
 
     <div class="policy-section">
-
         <div class="section-number">6</div>
-
         <h2>Зберігання та захист</h2>
 
         <div class="info-card">
             <b>Дані облікового запису</b> — до моменту його видалення.
         </div>
-
         <div class="info-card">
             <b>Маршрути та місця</b> — до видалення вами або акаунтом.
         </div>
-
         <div class="info-card">
             <b>Технічні журнали</b> — не більше 12 місяців.
         </div>
 
         <div class="notice-box">
-            Після видалення акаунта дані видаляються протягом <b>30 днів.</b>
+            После видалення акаунта дані видаляються протягом <b>30 днів.</b>
         </div>
-
     </div>
 
     <div class="policy-section">
-
         <div class="section-number">7</div>
-
         <h2>Ваші права</h2>
 
-        <div class="info-card"><b>Доступ </b> — отримати копію ваших персональних даних.</div>
+        <div class="info-card"><b>Доступ</b> — отримати копію ваших персональних даних.</div>
         <div class="info-card"><b>Виправлення</b> — змінити неточні або застарілі дані.</div>
         <div class="info-card"><b>Видалення</b> — «право на забуття».</div>
         <div class="info-card"><b>Перенесення</b> — отримати дані у машинозчитуваному форматі.</div>
@@ -363,50 +395,37 @@ th,td{
             <br>
             <b>freewayvinnytsia@gmail.com</b>
         </div>
-
     </div>
 
     <div class="policy-section">
-
         <div class="section-number">8</div>
-
         <h2>Файли cookie</h2>
-
         <p>
             Вебверсія FreeWay використовує cookie для
             підтримки сесії та запам'ятовування налаштувань. Ви
             можете відключити cookie в налаштуваннях
             браузера.
         </p>
-
     </div>
 
     <div class="policy-section">
-
         <div class="section-number">9</div>
-
         <h2>Діти</h2>
-
         <p>
             Сервіс не призначений для осіб молодше 13 років.
             Якщо вам відомо про такі випадки — повідомте нас, і
             ми видалимо ці дані.
         </p>
-
     </div>
 
     <div class="policy-section">
-
         <div class="section-number">10</div>
-
         <h2>Зміни до Політики</h2>
-
         <p>
             У разі суттєвих змін ми повідомимо через застосунок
             або email не менш ніж за 7 днів до набрання
             чинності.
         </p>
-
     </div>
 
 </div>

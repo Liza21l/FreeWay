@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Про нас — FreeWay</title>
+    <link rel="stylesheet" href="style-about.css">
+    <style>
+        /* Базові налаштування мобільного інтерфейсу */
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+        background-color: #f6f6f4;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 100vh;
+    }
+
+    /* Контейнер екрана телефона */
+    .app-container {
+        width: 100%;
+        max-width: 480px;
+        background-color: #ffffff;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.04);
+    }
+
+    @media (max-width: 480px) {
+        .app-container {
+            max-width: 100%;
+            box-shadow: none;
+        }
+    }
+
+    /* Темно-синій верхній блок */
+    .hero-section {
+        background-color: #102e5b;
+        padding: 16px 16px 60px 16px; /* Нижній відступ з запасом під білу плашку */
+        position: relative;
+        border-bottom-left-radius: 24px;
+        border-bottom-right-radius: 24px;
+    }
+
+    /* Шапка всередині синього блоку */
+    .app-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .btn-back {
+        width: 36px;
+        height: 36px;
+        background-color: rgba(255, 255, 255, 0.12);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+    }
+
+    .btn-back::after {
+        content: '';
+        width: 7px;
+        height: 7px;
+        border-left: 2px solid #ffffff;
+        border-bottom: 2px solid #ffffff;
+        transform: rotate(45deg);
+        margin-left: 2px;
+    }
+
+    .app-header h1 {
+        font-size: 17px;
+        font-weight: 700;
+        color: #ffffff;
+        margin-left: 14px;
+    }
+
+    /* Текстовий вміст синього блоку */
+    .hero-content {
+        margin-bottom: 20px;
+    }
+
+    .history-badge {
+        display: inline-block;
+        background-color: rgba(255, 255, 255, 0.1);
+        color: #8bb2f9;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 6px 12px;
+        border-radius: 20px;
+        margin-bottom: 14px;
+    }
+
+    .hero-content h2 {
+        font-size: 24px;
+        font-weight: 700;
+        color: #ffffff;
+        line-height: 1.3;
+        margin-bottom: 12px;
+    }
+
+    .accent-text {
+        color: #5c96ff;
+    }
+
+    .hero-content p {
+        font-size: 13.5px;
+        line-height: 1.5;
+        color: #b0cbe6;
+    }
+
+    /* Біла плашка зі статистикою */
+    .stats-card {
+        background-color: #ffffff;
+        border-radius: 18px;
+        padding: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0px 10px 25px rgba(16, 46, 91, 0.08);
+        position: absolute;
+        bottom: -40px;
+        left: 16px;
+        right: 16px;
+        z-index: 5;
+    }
+
+    .stat-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .stat-num {
+        font-size: 20px;
+        font-weight: 800;
+        color: #102e5b;
+        margin-bottom: 2px;
+    }
+
+    .stat-label {
+        font-size: 10px;
+        color: #8a8a8a;
+        font-weight: 500;
+    }
+
+    .stat-divider {
+        width: 1px;
+        height: 28px;
+        background-color: #f0eee9;
+    }
+
+    /* Нижня світла частина сторінки */
+    .app-content {
+        padding: 64px 16px 30px 16px; /* Верхній паддінг компенсує нависання плашки */
+        background-color: #ffffff;
+    }
+
+    /* Дрібні підписи-теги перед заголовками */
+    .section-tag {
+        display: block;
+        font-size: 10.5px;
+        font-weight: 700;
+        color: #3b629b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+    }
+
+    .section-title {
+        font-size: 17px;
+        font-weight: 700;
+        color: #102e5b;
+        margin-bottom: 12px;
+    }
+
+    .story-text {
+        font-size: 13px;
+        line-height: 1.55;
+        color: #555555;
+        margin-bottom: 14px;
+    }
+
+    /* Темно-синя місія */
+    .mission-card {
+        background-color: #0b2245;
+        background-image: radial-gradient(circle at top right, rgba(255,255,255,0.06), transparent);
+        border-radius: 20px;
+        padding: 20px;
+        color: #ffffff;
+        margin: 24px 0;
+    }
+
+    .mission-icon {
+        width: 36px;
+        height: 36px;
+        background-color: rgba(255, 255, 255, 0.08);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        margin-bottom: 16px;
+    }
+
+    .mission-card h4 {
+        font-size: 10px;
+        font-weight: 700;
+        color: #5c96ff;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+    }
+
+    .mission-card h3 {
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .mission-card p {
+        font-size: 12.5px;
+        line-height: 1.5;
+        color: #9cb5d0;
+    }
+
+    /* Список можливостей */
+    .features-list {
+        margin-bottom: 24px;
+    }
+
+    .feature-item {
+        display: flex;
+        background-color: #faf9f6;
+        padding: 14px;
+        border-radius: 16px;
+        margin-bottom: 10px;
+    }
+
+    .feature-icon {
+        width: 36px;
+        height: 36px;
+        background-color: #e8f0fe;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        margin-right: 14px;
+        flex-shrink: 0;
+    }
+
+    .feature-text strong {
+        display: block;
+        font-size: 14px;
+        font-weight: 700;
+        color: #102e5b;
+        margin-bottom: 3px;
+    }
+
+    .feature-text p {
+        font-size: 12px;
+        line-height: 1.45;
+        color: #666666;
+    }
+
+    /* Блок цінностей: Сітка 2х2 */
+    .values-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .value-card {
+        background-color: #faf9f6;
+        padding: 14px;
+        border-radius: 16px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .value-icon {
+        width: 34px;
+        height: 34px;
+        background-color: #e8f0fe;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        margin-bottom: 12px;
+    }
+
+    .value-card strong {
+        font-size: 13px;
+        font-weight: 700;
+        color: #102e5b;
+        margin-bottom: 4px;
+    }
+
+    .value-card p {
+        font-size: 11.5px;
+        line-height: 1.4;
+        color: #666666;
+    }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <div class="hero-section">
+            <header class="app-header">
+                <a href="{% url 'home' %}" class="btn-back"></a>
+                <h1>Про нас</h1>
+            </header>
+
+            <div class="hero-content">
+                <span class="history-badge">● Наша історія</span>
+                <h2>Ми допомагаємо відкривати <span class="accent-text">своє місто</span></h2>
+                <p>FreeWay — це команда з Вінниці, яка вірить: кожне місто приховує більше, ніж здається на перший погляд.</p>
+            </div>
+
+            <div class="stats-card">
+                <div class="stat-item">
+                    <span class="stat-num">2025</span>
+                    <span class="stat-label">рік заснування</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-num">8+</span>
+                    <span class="stat-label">категорій місць</span>
+                </div>
+                
+            </div>
+        </div>
+
+        <main class="app-content">
+            
+            <span class="section-tag">як все почалося</span>
+            <h3 class="section-title">Ідея народилась із проблеми</h3>
+            
+            <p class="story-text">
+                Одного дня ми зрозуміли, що живемо у Вінниці вже кілька років, але досі відкриваємо для себе нові місця випадково. Не тому що їх мало — а тому що немає зручного інструменту, який сказав би: «Ось що є поруч, ось як пройти так, щоб побачити максимум».
+            </p>
+            <p class="story-text">
+                Так з'явився FreeWay — платформа, яка будує маршрут під тебе: обираєш категорії місць, вказуєш скільки часу є — і за секунди отримуєш готову прогулянку.
+            </p>
+
+            <div class="mission-card">
+                <div class="mission-icon">🎯</div>
+                <h4>НАША МІСІЯ</h4>
+                <h3>Зробити кожне місто відкритим</h3>
+                <p>Для тих, хто живе тут роками і ще відкриває нові куточки. І для тих, хто приїхав вперше і не знає, з чого почати.</p>
+            </div>
+
+            <span class="section-tag">що ми робимо</span>
+            <h3 class="section-title">Можливості FreeWay</h3>
+
+            <div class="features-list">
+                <div class="feature-item">
+                    <div class="feature-icon">🧠</div>
+                    <div class="feature-text">
+                        <strong>Розумні маршрути</strong>
+                        <p>Будуємо оптимальний шлях між усіма вибраними точками — без зайвих кілометрів.</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">📍</div>
+                    <div class="feature-text">
+                        <strong>Місця поруч</strong>
+                        <p>Кафе, ресторани, парки, музеї, аптеки — актуальна інформація про те, що є поблизу.</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">🕒</div>
+                    <div class="feature-text">
+                        <strong>Актуальний графік</strong>
+                        <p>Показуємо чи відчинено місце прямо зараз, щоб ти не приходив на зачинені двері.</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">📱</div>
+                    <div class="feature-text">
+                        <strong>Зручно скрізь</strong>
+                        <p>iPhone, Android або браузер — FreeWay працює на будь-якому пристрої без встановлення.</p>
+                    </div>
+                </div>
+            </div>
+
+            <span class="section-tag">цінності</span>
+            <h3 class="section-title">У що ми віримо</h3>
+
+            <div class="values-grid">
+                <div class="value-card">
+                    <div class="value-icon">❤️</div>
+                    <strong>Місцева душа</strong>
+                    <p>Ми з Вінниці — і знаємо місто зсередини.</p>
+                </div>
+
+                <div class="value-card">
+                    <div class="value-icon">🎁</div>
+                    <strong>Безкоштовно</strong>
+                    <p>Базовий функціонал завжди буде безплатним.</p>
+                </div>
+
+                <div class="value-card">
+                    <div class="value-icon">⚡</div>
+                    <strong>Швидко</strong>
+                    <p>Маршрут за 2 секунди, без зайвих кроків.</p>
+                </div>
+
+                <div class="value-card">
+                    <div class="value-icon">🚀</div>
+                    <strong>Постійний розвиток</strong>
+                    <p>Слухаємо користувачів і оновлюємось щотижня.</p>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+</body>
+</html>

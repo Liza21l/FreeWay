@@ -446,6 +446,16 @@ def privacy_policy(request):
     return render(request, "places/privacy_policy.html")
 
 @login_required
+def user_rules(request):
+    return render(request, "places/user_rules.html")
+@login_required
+def contacts(request):
+    return render(request, "places/contacts.html")
+
+@login_required
+def aboutUs(request):
+    return render(request, "places/aboutUs.html")
+@login_required
 def shared_route_view(request, share_uuid):
     route = get_object_or_404(UserRoute, share_uuid=share_uuid, visibility="public")
 

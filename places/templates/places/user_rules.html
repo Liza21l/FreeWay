@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Правила користування — FreeWay</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Скидання стилів та базові налаштування мобільного інтерфейсу */
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        -webkit-tap-highlight-color: transparent; /* Прибирає синій спалах при тапі на айфонах */
+    }
+
+    body {
+        background-color: #f6f6f4; /* Приємний світло-сірий фон для десктопу */
+        color: #333333;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 100vh;
+    }
+
+    /* Контейнер додатка: адаптований під мобільні екрани */
+    .app-container {
+        width: 100%;
+        max-width: 480px; /* Ідеальна мобільна ширина */
+        background-color: #ffffff;
+        border-bottom-left-radius:40px;
+        border-bottom-right-radius:40px;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.04);
+    }
+
+    /* Адаптація під реальні смартфони */
+    @media (max-width: 480px) {
+        .app-container {
+            max-width: 100%;
+            box-shadow: none;
+        }
+    }
+
+    /* Шапка (Header) */
+    .app-header {
+        display: flex;
+        align-items: center;
+        padding: 14px 16px;
+        border-bottom: 1px solid #f0effc;
+        position: sticky;
+        top: 0;
+        background-color: #ffffff;
+        z-index: 10;
+    }
+
+    .btn-back {
+        width: 34px;
+        height: 34px;
+        background-color: #f3f2ef;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 14px;
+        transition: background-color 0.2s ease;
+    }
+
+    .btn-back:active {
+        background-color: #e5e4e0;
+    }
+
+    /* Стрілка "Назад" через CSS */
+    .btn-back::after {
+        content: '';
+        width: 7px;
+        height: 7px;
+        border-left: 2px solid #4a4a4a;
+        border-bottom: 2px solid #4a4a4a;
+        transform: rotate(45deg);
+        margin-left: 2px;
+    }
+
+    .app-header h1 {
+        font-size: 17px;
+        font-weight: 700;
+        color: #1a3c6d; /* Глибокий синій */
+    }
+
+    /* Рядок статусу та дати */
+    .document-status {
+        background-color: #faf9f6;
+        padding: 10px 16px;
+        font-size: 12px;
+        color: #777777;
+        border-bottom: 1px solid #f0effc;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        line-height: 1.4;
+    }
+
+    .live-dot {
+        width: 6px;
+        height: 6px;
+        background-color: #4cd964;
+        border-radius: 50%;
+        margin-right: 8px;
+        flex-shrink: 0;
+    }
+
+    .green-date {
+        color: #27a860;
+        font-weight: 600;
+    }
+
+    /* Головна область з прокруткою */
+    .app-content {
+        padding: 20px 16px;
+        flex: 1;
+    }
+
+    /* Окремі блоки правил */
+    .rules-section {
+        margin-bottom: 28px;
+    }
+
+    .badge-number {
+        width: 22px;
+        height: 22px;
+        background-color: #e8f0fe;
+        color: #1a3c6d;
+        font-size: 11px;
+        font-weight: 700;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 8px;
+    }
+
+    .rules-section h2 {
+        font-size: 15px;
+        font-weight: 700;
+        color: #1a3c6d;
+        margin-bottom: 10px;
+    }
+
+    .rules-section p {
+        font-size: 13.5px;
+        line-height: 1.5;
+        color: #555555;
+        margin-bottom: 10px;
+    }
+
+    .rules-section .sub-label {
+        font-weight: 600;
+        margin-top: 12px;
+        margin-bottom: 6px;
+        color: #444444;
+    }
+
+    /* Списки у вигляді карток плашок */
+    .cards-list {
+        list-style: none;
+        margin-bottom: 10px;
+    }
+
+    .cards-list li {
+        background-color: #f8f7f5;
+        padding: 12px 14px 12px 34px;
+        border-radius: 10px;
+        font-size: 13px;
+        line-height: 1.45;
+        color: #4a4a4a;
+        margin-bottom: 6px;
+        position: relative;
+        transition: background-color 0.15s ease;
+    }
+
+    /* Ефект тапу/натискання на телефоні */
+    .cards-list li:active {
+        background-color: #f0eee9;
+    }
+
+    /* Сині маркери в картках */
+    .cards-list li::before {
+        content: '';
+        position: absolute;
+        left: 14px;
+        top: 18px;
+        width: 5px;
+        height: 5px;
+        background-color: #3b82f6;
+        border-radius: 50%;
+    }
+
+    /* Сині інформаційні плашки (Повідомлення) */
+    .msg-box {
+        display: flex;
+        align-items: flex-start;
+        padding: 12px 14px;
+        border-radius: 10px;
+        margin: 12px 0;
+    }
+
+    .info-blue {
+        background-color: #ebf3ff;
+    }
+
+    .msg-box .msg-icon {
+        margin-right: 10px;
+        flex-shrink: 0;
+    }
+
+    .icon-info {
+        color: #3b82f6;
+        border: 1.5px solid #3b82f6;
+        border-radius: 50%;
+        width: 16px;
+        height: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: bold;
+        margin-top: 1px;
+    }
+
+    .icon-warn {
+        color: #1a3c6d;
+        font-size: 16px;
+        line-height: 1;
+    }
+
+    .msg-box p {
+        font-size: 12.5px;
+        line-height: 1.4;
+        color: #1a3c6d;
+        margin: 0;
+        font-weight: 400;
+    }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <header class="app-header">
+            <a href="{% url 'home' %}" class="btn-back"></a>
+            <h1>Правила користування</h1>
+        </header>
+
+        <div class="document-status">
+            <span class="live-dot"></span>
+            Набрали чинності: <strong class="green-date">09.06.2026</strong> &nbsp;·&nbsp; Редакція: <strong class="green-date">09.06.2026</strong>
+        </div>
+
+        <main class="app-content">
+            
+            <section class="rules-section">
+                <div class="badge-number">1</div>
+                <h2>Загальні положення</h2>
+                <p>Ці Правила регулюють відносини між FreeWay та користувачем під час використання застосунку та вебсайту. Використовуючи FreeWay, Ви підтверджуєте згоду з цими Правилами.</p>
+                
+                <div class="msg-box info-blue">
+                    <span class="msg-icon icon-info">!</span>
+                    <p>Якщо Ви не погоджуєтесь із Правилами — будь ласка, припиніть використання Сервісу.</p>
+                </div>
+            </section>
+
+            <section class="rules-section">
+                <div class="badge-number">2</div>
+                <h2>Опис Сервісу</h2>
+                <p>FreeWay — безкоштовний сервіс для побудови персональних маршрутів. Застосунок допомагає:</p>
+                
+                <ul class="cards-list">
+                    <li>Будувати оптимальні маршрути між обраними місцями.</li>
+                    <li>Знаходити кафе, ресторани, парки, аптеки та інші заклади поруч.</li>
+                    <li>Отримувати актуальну інформацію про графік роботи закладів.</li>
+                    <li>Зберігати маршрути та улюблені місця.</li>
+                </ul>
+                
+                <p>Доступний на iOS, Android та у вебверсії. Ми не гарантуємо безперебійну роботу та залишаємо право тимчасово зупиняти для обслуговування.</p>
+            </section>
+
+            <section class="rules-section">
+                <div class="badge-number">3</div>
+                <h2>Реєстрація та обліковий запис</h2>
+                <p>Реєстрація через email або Google. Ви зобов'язані:</p>
+                
+                <ul class="cards-list">
+                    <li>Надавати достовірну інформацію при реєстрації.</li>
+                    <li>Зберігати конфіденційність даних для входу.</li>
+                    <li>Негайно повідомляти про несанкціонований доступ.</li>
+                </ul>
+                
+                <p>Один користувач — один обліковий запис. Ми залишаємо право заблокувати акаунт у разі порушення Правил.</p>
+            </section>
+
+            <section class="rules-section">
+                <div class="badge-number">4</div>
+                <h2>Права та обов'язки користувача</h2>
+                <p class="sub-label">Ви маєте право:</p>
+                <ul class="cards-list">
+                    <li>Безкоштовно користуватись базовим функціоналом.</li>
+                    <li>Зберігати, редагувати та видаляти свої маршрути і дані.</li>
+                    <li>Звертатись до служби підтримки.</li>
+                    <li>Видалити свій акаунт у будь-який момент.</li>
+                </ul>
+
+                <p class="sub-label">Ви зобов'язані:</p>
+                <ul class="cards-list">
+                    <li>Використовувати Сервіс лише в законних цілях.</li>
+                    <li>Не намагатись отримати несанкціонований доступ до систем.</li>
+                    <li>Не поширювати шкідливе програмне забезпечення.</li>
+                    <li>Не збирати дані автоматизованими засобами.</li>
+                </ul>
+            </section>
+
+            <section class="rules-section">
+                <div class="badge-number">5</div>
+                <h2>Права та обов'язки Сервісу</h2>
+                <ul class="cards-list">
+                    <li>Докладати зусиль для забезпечення стабільної роботи.</li>
+                    <li>Захищати персональні дані відповідно до Політики конфіденційності.</li>
+                    <li>Відповідати на звернення у розумні строки.</li>
+                </ul>
+            </section>
+
+            <section class="rules-section">
+                <div class="badge-number">6</div>
+                <h2>Інтелектуальна власність</h2>
+                <p>Назва FreeWay, логотип, дизайн, код, тексти — інтелектуальна власність розробника, захищена законодавством України.</p>
+                
+                <div class="msg-box info-blue">
+                    <span class="msg-icon icon-warn">⃠</span>
+                    <p>Забороняється копіювати, модифікувати або поширювати матеріали Сервісу без письмового дозволу.</p>
+                </div>
+            </section>
+
+            <section class="rules-section">
+                <div class="badge-number">7</div>
+                <h2>Обмеження відповідальності</h2>
+                <p>Сервіс надається «як є». Ми не несемо відповідальності за:</p>
+                
+                <ul class="cards-list">
+                    <li>Точність та актуальність інформації про заклади.</li>
+                    <li>Збитки, спричинені використанням або недоступністю Сервісу.</li>
+                    <li>Маршрути, прокладені на основі неактуальних даних Google Maps.</li>
+                </ul>
+            </section>
+
+            <section class="rules-section">
+                <div class="badge-number">8</div>
+                <h2>Застосовне право</h2>
+                <p>Ці Правила регулюються законодавством України. Усі спори вирішуються у судовому порядку за місцем реєстрації Сервісу.</p>
+            </section>
+
+        </main>
+    </div>
+
+</body>
+</html>

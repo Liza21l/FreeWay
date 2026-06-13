@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Контакти — FreeWay</title>
+    <link rel="stylesheet" href="style-contacts.css">
+    <style>
+        /* Базові налаштування мобільного інтерфейсу */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background-color: #f6f6f4;
+    color: #333333;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+}
+
+/* Контейнер мобільного екрана */
+.app-container {
+    width: 100%;
+    max-width: 480px;
+    background-color: #ffffff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.04);
+}
+
+@media (max-width: 480px) {
+    .app-container {
+        max-width: 100%;
+        box-shadow: none;
+    }
+}
+
+
+/* Темно-синя шапка (Header) */
+.app-header {
+    background-color: #102e5b;
+    display: flex;
+    align-items: center;
+    padding: 14px 16px 20px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.btn-back {
+    width: 36px;
+    height: 36px;
+    background-color: rgba(255, 255, 255, 0.15); /* Напівпрозора кнопка */
+    border: none;
+    border-radius: 10px; /* Квадратна із закругленням, як на фото */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 16px;
+    transition: background-color 0.2s ease;
+}
+
+.btn-back:active {
+    background-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Біла стрілка назад */
+.btn-back::after {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-left: 2px solid #ffffff;
+    border-bottom: 2px solid #ffffff;
+    transform: rotate(45deg);
+    margin-left: 2px;
+}
+
+.app-header h1 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+/* Головний контент */
+.app-content {
+    padding: 20px 16px;
+    background-color: #ffffff;
+    flex: 1;
+}
+
+/* Заголовки секцій (дрібний синій капслок) */
+.section-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #3b629b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 16px;
+    margin-bottom: 10px;
+    padding-left: 4px;
+}
+
+/* Групування елементів служби підтримки в одну картку */
+.info-group {
+    background-color: #faf9f6;
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+.info-row {
+    display: flex;
+    align-items: center;
+    padding: 14px 16px;
+    position: relative;
+}
+
+/* Розділова лінія між елементами в групі */
+.info-row:not(:last-child) {
+    border-bottom: 1px solid #f0eee9;
+}
+
+.clickable:active {
+    background-color: #f0eee9;
+}
+
+/* Круглі підкладки під іконки */
+.icon-wrapper {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.email-bg { background-color: #e8f0fe; color: #3b82f6; }
+.time-bg { background-color: #e8f0fe; color: #3b82f6; }
+
+.icon {
+    font-size: 16px;
+}
+
+/* Текстові блоки */
+.row-text {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.label {
+    font-size: 11px;
+    color: #8a8a8a;
+    margin-bottom: 2px;
+}
+
+.value {
+    font-size: 13px;
+    color: #4a4a4a;
+    font-weight: 500;
+}
+
+.mail-link {
+    color: #1a3c6d;
+    font-weight: 600;
+}
+
+
+
+/* Окремі картки для соцмереж */
+.social-row {
+    display: flex;
+    align-items: center;
+    background-color: #faf9f6;
+    padding: 14px 16px;
+    border-radius: 16px;
+    margin-bottom: 10px;
+}
+
+.instagram-bg { background-color: #fbe7e9; color: #e1306c; }
+.telegram-bg { background-color: #e3f2fd; color: #0088cc; }
+.facebook-bg { background-color: #e8eaf6; color: #3b5998; font-weight: bold; font-size: 18px; }
+
+.icon-social {
+    font-size: 16px;
+}
+
+.social-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a3c6d;
+}
+
+.social-status {
+    font-size: 11px;
+    color: #9a9a9a;
+    margin-top: 1px;
+}
+
+/* Велика синя картка повідомлення про помилку */
+.error-report-card {
+    background-color: #102e5b;
+    border-radius: 20px;
+    padding: 20px;
+    margin-top: 24px;
+    color: #ffffff;
+}
+
+.bug-icon-wrapper {
+    width: 36px;
+    height: 36px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+}
+
+.bug-icon {
+    font-size: 18px;
+    color: #6ba4ff;
+}
+
+.error-report-card h3 {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.error-report-card .card-desc {
+    font-size: 12px;
+    line-height: 1.5;
+    color: #a4bcd4;
+    margin-bottom: 16px;
+}
+
+.white-text {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+/* Список кроків всередині картки */
+.error-steps {
+    list-style: none;
+}
+
+.error-steps li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.step-num {
+    width: 20px;
+    height: 20px;
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #6ba4ff;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.step-text {
+    font-size: 12.5px;
+    color: #cbdbe7;
+}
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+
+        <header class="app-header">
+            <a href="{% url 'home' %}" class="btn-back"></a>
+            <h1>Контакти</h1>
+        </header>
+
+        <main class="app-content">
+            
+            <div class="section-title">Служба підтримки</div>
+            
+            <div class="info-group">
+                <div class="info-row clickable">
+                    <div class="icon-wrapper email-bg">
+                        <span class="icon">✉</span>
+                    </div>
+                    <div class="row-text">
+                        <span class="label">Електронна пошта</span>
+                        <span class="value mail-link">freewayvinnytsia@gmail.com</span>
+                    </div>
+                    <div class="arrow-right"></div>
+                </div>
+                
+                <div class="info-row">
+                    <div class="icon-wrapper time-bg">
+                        <span class="icon">🕒</span>
+                    </div>
+                    <div class="row-text">
+                        <span class="label">Час відповіді</span>
+                        <span class="value">1–2 робочих дні</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-title">Соціальні мережі</div>
+
+            <div class="social-row clickable">
+                <div class="icon-wrapper instagram-bg">
+                    <span class="icon-social"><svg width="30px" height="30px" viewBox="0 -0.5 25 25" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path fill-rule="evenodd" clip-rule="evenodd" d="M15.5 5H9.5C7.29086 5 5.5 6.79086 5.5 9V15C5.5 17.2091 7.29086 19 9.5 19H15.5C17.7091 19 19.5 17.2091 19.5 15V9C19.5 6.79086 17.7091 5 15.5 5Z" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> <path fill-rule="evenodd" clip-rule="evenodd" d="M12.5 15C10.8431 15 9.5 13.6569 9.5 12C9.5 10.3431 10.8431 9 12.5 9C14.1569 9 15.5 10.3431 15.5 12C15.5 12.7956 15.1839 13.5587 14.6213 14.1213C14.0587 14.6839 13.2956 15 12.5 15Z" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> <rect x="15.5" y="9" width="2" height="2" rx="1" transform="rotate(-90 15.5 9)" fill="#000000"></rect> <rect x="16" y="8.5" width="1" height="1" rx="0.5" transform="rotate(-90 16 8.5)" stroke="#000000" stroke-linecap="round"></rect> </g></svg></span>
+                </div>
+                <div class="row-text">
+                    <span class="social-name">Instagram</span>
+                    <span class="social-status">Скоро буде</span>
+                </div>
+                <div class="arrow-right"></div>
+            </div>
+
+            <div class="social-row clickable">
+                <div class="icon-wrapper telegram-bg">
+                    <span  class="icon-social"><svg width="28px" height="28px" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg" fill="none"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path stroke="#000000" stroke-width="12" d="M23.073 88.132s65.458-26.782 88.16-36.212c8.702-3.772 38.215-15.843 38.215-15.843s13.621-5.28 12.486 7.544c-.379 5.281-3.406 23.764-6.433 43.756-4.54 28.291-9.459 59.221-9.459 59.221s-.756 8.676-7.188 10.185c-6.433 1.509-17.027-5.281-18.919-6.79-1.513-1.132-28.377-18.106-38.214-26.404-2.649-2.263-5.676-6.79.378-12.071 13.621-12.447 29.891-27.913 39.728-37.72 4.54-4.527 9.081-15.089-9.837-2.264-26.864 18.483-53.35 35.835-53.35 35.835s-6.053 3.772-17.404.377c-11.351-3.395-24.594-7.921-24.594-7.921s-9.08-5.659 6.433-11.693Z"></path></g></svg></span>
+                </div>
+                <div class="row-text">
+                    <span class="social-name">Telegram-канал</span>
+                    <span class="social-status">Скоро буде</span>
+                </div>
+                <div class="arrow-right"></div>
+            </div>
+
+            <div class="social-row clickable">
+                <div class="icon-wrapper facebook-bg">
+                    <span class="icon-social">f</span>
+                </div>
+                <div class="row-text">
+                    <span class="social-name">Facebook</span>
+                    <span class="social-status">Скоро буде</span>
+                </div>
+                <div class="arrow-right"></div>
+            </div>
+
+            <div class="error-report-card">
+                <div class="card-icon-header">
+                    <div class="bug-icon-wrapper">
+                        <span class="bug-icon">⚙</span>
+                    </div>
+                </div>
+                
+                <h3>Повідомити про помилку</h3>
+                <p class="card-desc">Надішліть на <strong class="white-text">freewayvinnytsia@gmail.com</strong> з темою <strong class="white-text">«Помилка»</strong>, вказавши:</p>
+                
+                <ul class="error-steps">
+                    <li>
+                        <span class="step-num">1</span>
+                        <span class="step-text">Що саме сталося</span>
+                    </li>
+                    <li>
+                        <span class="step-num">2</span>
+                        <span class="step-text">Пристрій та версія застосунку</span>
+                    </li>
+                    <li>
+                        <span class="step-num">3</span>
+                        <span class="step-text">Скриншот (якщо можливо)</span>
+                    </li>
+                </ul>
+            </div>
+
+        </main>
+    </div>
+
+</body>
+</html>
