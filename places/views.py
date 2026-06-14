@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field, ValidationError
 from google.genai import Client
 from json_repair import repair_json
 from urllib.parse import quote
+from django.urls import reverse
 
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect, get_object_or_404
@@ -432,7 +433,8 @@ def save_ai_route(request):
         return JsonResponse({
             "route_id": route.id,
             "route_name": route.name,
-            "created_at": route.created_at.strftime("%d.%m.%Y %H:%M")
+            "created_at": route.created_at.strftime("%d.%m.%Y %H:%M"),
+            "redirect_url": reverse('home')
         })
         
     return JsonResponse({"error": "Invalid method"}, status=405)

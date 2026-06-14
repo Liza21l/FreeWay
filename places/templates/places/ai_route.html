@@ -655,12 +655,13 @@ document.getElementById("ai-route-form").addEventListener("submit", function(e){
             )
             .then(res => res.json())
             .then(resp => {
-
-                alert(
-                    "Маршрут збережено! ID: "
-                    + resp.route_id
-                );
-
+                // ТУТ ЗМІНИ: Якщо з бекенду прийшов redirect_url, використовуємо його. 
+                // Якщо ні — жорстко перенаправляємо на головну сторінку "/"
+                if (resp.redirect_url) {
+                    window.location.href = resp.redirect_url;
+                } else {
+                    window.location.href = "/"; 
+                }
             })
             .catch(err => {
 
@@ -670,7 +671,7 @@ document.getElementById("ai-route-form").addEventListener("submit", function(e){
                     "Помилка збереження маршруту"
                 );
 
-            });
+                });
         };
 
         block.appendChild(saveBtn);
