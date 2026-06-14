@@ -206,8 +206,17 @@ body{
         const r   = e.routes[0];
         const km  = (r.summary.totalDistance / 1000).toFixed(2);
         const min = Math.round(r.summary.totalTime / 7);
+        const hours = Math.floor(min / 60);
+        const mins = min % 60;
+        
+        let timeString = "";
+            if (hours > 0) {
+                timeString += hours + " год ";
+            }
+            timeString += mins + " хв";
+
         document.getElementById('info').innerHTML =
-          `Маршрут по вулицях: <b>${km} км</b> | Час пішки: <b>~${min} хв</b>`;
+          `Маршрут по вулицях: <b>${km} км</b> | Час пішки: <b>~${timeString}</b>`;
       });
     }
 </script>

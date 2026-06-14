@@ -838,8 +838,17 @@ routes.forEach(route => {
             const r = e.routes[0];
             const km = (r.summary.totalDistance / 1000).toFixed(2);
             const min = Math.round(r.summary.totalTime / 7);
+            const hours = Math.floor(min / 60);
+            const mins = min % 60;
+            
+            let timeString = "";
+                if (hours > 0) {
+                    timeString += hours + " год ";
+                }
+                timeString += mins + " хв";
+
             document.getElementById(`info-${route.id}`).innerHTML =
-                `📍 ${km} км • 🚶 ~${min} хв`;
+                `📍 ${km} км • 🚶 ~${timeString}`;
         });
     }
 });
