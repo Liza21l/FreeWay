@@ -40,6 +40,7 @@ def fetch_places(city: City, categories: list):
             "radius": 5000,   # радіус у метрах
             "type": cat,      # напряму Google Places type
             "key": api_key,
+            "language": "uk",
         }
         resp = requests.get(url, params=params).json()
         print("Отримано результатів:", len(resp.get("results", [])))

@@ -606,9 +606,11 @@ body{
             <h3>Виберіть категорію</h3>
             <select id="filterSelect">
               <option value="">Усі категорії</option>
-              {% for value in selected_categories %}
-                <option value="{{ value }}">{{ value|capfirst }}</option>
-              {% endfor %}
+                {% for value, label in all_categories %}
+                    {% if value in selected_categories %}
+                        <option value="{{ value }}">{{ label }}</option>
+                    {% endif %}
+                {% endfor %}
             </select>
             <button type="button" id="applyFilter">Застосувати</button>
             <button type="button" id="closeFilter">Закрити</button>

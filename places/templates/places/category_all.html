@@ -213,7 +213,19 @@
             ←
         </a>
 
-        <h1>{{ category }}</h1>
+        <h1>{% if category == 'cafe' %}Кафе
+            {% elif category == 'restaurant' %} Ресторани
+            {% elif category == 'museum' %}Музеї
+            {% elif category == 'bar' %}Бари
+            {% elif category == 'park' %} Парки
+            {% elif category == 'meal_takeaway' %} Фастфуди
+            {% elif category == 'bakery' %}Пекарні
+            {% elif category == 'night_club' %} Нічні клуби
+            {% elif category == 'movie_theater' %}Кінотеатри/Театри
+            {% elif category == 'supermarket' %}Супермаркети
+            {% elif category == 'tourist_attraction' %} Пам’ятки
+            {% else %}{{ category }}{% endif %}
+        </h1>
 
         <p>
             Заклади поруч із вами
